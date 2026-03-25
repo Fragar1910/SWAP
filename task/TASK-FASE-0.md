@@ -126,7 +126,7 @@
     - [ ] No dependency conflicts reported by cargo
     - [ ] `cargo check` passes
 
-- [ ] **TASK-F0-007** [P] Install TypeScript test dependencies | `package.json`
+- [x] **TASK-F0-007** [P] Install TypeScript test dependencies | `package.json`
   - **Commit:** `chore(bootstrap): install TypeScript test dependencies`
   - **Acceptance:**
     - `npm install` or `yarn install` executed
