@@ -89,7 +89,7 @@
     - [ ] `solana address` returns valid public key
     - [ ] Keypair file exists at configured path
 
-- [ ] **TASK-F0-005** Generate program ID and update configuration | `Anchor.toml`, `lib.rs`
+- [x] **TASK-F0-005** Generate program ID and update configuration | `Anchor.toml`, `lib.rs`
   - **Commit:** `chore(bootstrap): generate and configure program ID`
   - **Acceptance:**
     - `anchor keys list` executed to generate program ID
