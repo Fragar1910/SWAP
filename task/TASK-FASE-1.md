@@ -35,7 +35,7 @@
 **Purpose:** Define all types, structures, and constants.
 **Checkpoint:** Program compiles with all account/error/event definitions.
 
-- [ ] **TASK-F1-001** Create MarketAccount struct | `programs/swap-program/src/state/market.rs`
+- [x] **TASK-F1-001** Create MarketAccount struct | `programs/swap-program/src/state/market.rs`
   - **Commit:** `feat(types): add MarketAccount struct with PDA fields`
   - **Acceptance:**
     - Struct has all 7 fields: authority, token_mint_a, token_mint_b, price, decimals_a, decimals_b, bump
@@ -52,7 +52,7 @@
     - [ ] Documentation comments include traceability IDs
     - [ ] `cargo check` passes
 
-- [ ] **TASK-F1-002** Create SwapError enum | `programs/swap-program/src/error.rs`
+- [x] **TASK-F1-002** Create SwapError enum | `programs/swap-program/src/error.rs`
   - **Commit:** `feat(types): add SwapError enum with 8 error codes`
   - **Acceptance:**
     - `#[error_code]` macro applied
@@ -71,7 +71,7 @@
     - [ ] No error code conflicts
     - [ ] `cargo check` passes
 
-- [ ] **TASK-F1-003** [P] Create constants module | `programs/swap-program/src/constants.rs`
+- [x] **TASK-F1-003** [P] Create constants module | `programs/swap-program/src/constants.rs`
   - **Commit:** `feat(types): add PDA seeds and constants`
   - **Acceptance:**
     - 3 PDA seeds defined: MARKET_SEED, VAULT_A_SEED, VAULT_B_SEED
@@ -85,7 +85,7 @@
     - [ ] Constants are pub const &[u8] or pub const u64/u8
     - [ ] Doc comments reference ADRs
 
-- [ ] **TASK-F1-004** [P] Create MarketInitialized event | `programs/swap-program/src/events.rs`
+- [x] **TASK-F1-004** [P] Create MarketInitialized event | `programs/swap-program/src/events.rs`
   - **Commit:** `feat(events): add MarketInitialized event struct`
   - **Acceptance:**
     - `#[event]` macro applied
@@ -99,7 +99,7 @@
     - [ ] Market field has `#[index]` for efficient queries
     - [ ] Doc comment references REQ-NF-009
 
-- [ ] **TASK-F1-005** [P] Create PriceSet event | `programs/swap-program/src/events.rs`
+- [x] **TASK-F1-005** [P] Create PriceSet event | `programs/swap-program/src/events.rs`
   - **Commit:** `feat(events): add PriceSet event struct`
   - **Acceptance:**
     - `#[event]` macro applied
@@ -113,7 +113,7 @@
     - [ ] Authority field tracks who made the change
     - [ ] `#[index]` on market field
 
-- [ ] **TASK-F1-006** [P] Create LiquidityAdded event | `programs/swap-program/src/events.rs`
+- [x] **TASK-F1-006** [P] Create LiquidityAdded event | `programs/swap-program/src/events.rs`
   - **Commit:** `feat(events): add LiquidityAdded event struct`
   - **Acceptance:**
     - `#[event]` macro applied
@@ -127,7 +127,7 @@
     - [ ] Records vault balances after addition
     - [ ] Timestamp field is i64
 
-- [ ] **TASK-F1-007** [P] Create SwapExecuted event | `programs/swap-program/src/events.rs`
+- [x] **TASK-F1-007** [P] Create SwapExecuted event | `programs/swap-program/src/events.rs`
   - **Commit:** `feat(events): add SwapExecuted event struct`
   - **Acceptance:**
     - `#[event]` macro applied
@@ -141,7 +141,7 @@
     - [ ] Both input and output amounts recorded
     - [ ] User field (not authority) for permissionless swaps
 
-- [ ] **TASK-F1-008** [P] Create SwapDirection enum and type aliases | `programs/swap-program/src/types.rs`
+- [x] **TASK-F1-008** [P] Create SwapDirection enum and type aliases | `programs/swap-program/src/types.rs`
   - **Commit:** `feat(types): add SwapDirection enum and type aliases`
   - **Acceptance:**
     - SwapDirection enum with AtoB and BtoA variants
@@ -155,7 +155,7 @@
     - [ ] Type aliases improve code readability
     - [ ] All required derives present
 
-- [ ] **TASK-F1-009** Create state module exports | `programs/swap-program/src/state/mod.rs`
+- [x] **TASK-F1-009** Create state module exports | `programs/swap-program/src/state/mod.rs`
   - **Commit:** `refactor(types): organize state module exports`
   - **Acceptance:**
     - `pub mod market;` declaration
@@ -175,7 +175,7 @@
 **Purpose:** Wire all modules into lib.rs.
 **Checkpoint:** All types accessible from lib.rs, IDL generation includes events and errors.
 
-- [ ] **TASK-F1-010** Integrate all modules into lib.rs | `programs/swap-program/src/lib.rs`
+- [x] **TASK-F1-010** Integrate all modules into lib.rs | `programs/swap-program/src/lib.rs`
   - **Commit:** `feat(types): integrate all type modules into program`
   - **Acceptance:**
     - Module declarations: `pub mod constants`, `pub mod error`, `pub mod events`, `pub mod state`, `pub mod types`
@@ -190,7 +190,7 @@
     - [ ] No circular dependencies
     - [ ] `anchor build` succeeds
 
-- [ ] **TASK-F1-011** Generate and verify IDL | `target/idl/swap_program.json`
+- [x] **TASK-F1-011** Generate and verify IDL | `target/idl/swap_program.json`
   - **Commit:** `test(types): verify IDL generation includes all types`
   - **Acceptance:**
     - `anchor build` generates IDL file
@@ -206,7 +206,7 @@
     - [ ] `cat target/idl/swap_program.json | jq '.events | length'` outputs 4
     - [ ] Event field types match spec
 
-- [ ] **TASK-F1-012** Add Rust unit tests for type definitions | `programs/swap-program/src/state/market.rs`
+- [x] **TASK-F1-012** Add Rust unit tests for type definitions | `programs/swap-program/src/state/market.rs`
   - **Commit:** `test(types): add unit tests for MarketAccount LEN constant`
   - **Acceptance:**
     - Test module `#[cfg(test)] mod tests` added to market.rs
@@ -227,7 +227,7 @@
 **Purpose:** Final validation of FASE-1 deliverables.
 **Checkpoint:** All acceptance criteria met, ready for FASE-2.
 
-- [ ] **TASK-F1-013** Build and verify no compiler warnings | Build output
+- [x] **TASK-F1-013** Build and verify no compiler warnings | Build output
   - **Commit:** `chore(types): eliminate compiler warnings`
   - **Acceptance:**
     - `anchor build` completes with 0 warnings
@@ -240,7 +240,7 @@
     - [ ] Clippy passes without suggestions
     - [ ] No unused imports
 
-- [ ] **TASK-F1-014** Verify TypeScript type generation | `target/types/swap_program.ts`
+- [x] **TASK-F1-014** Verify TypeScript type generation | `target/types/swap_program.ts`
   - **Commit:** `test(types): verify TypeScript types include all events and errors`
   - **Acceptance:**
     - `target/types/swap_program.ts` file exists
@@ -255,7 +255,7 @@
     - [ ] Error types include messages
     - [ ] No TypeScript compilation errors in tests
 
-- [ ] **TASK-F1-015** Document FASE-1 completion | Comments or status update
+- [x] **TASK-F1-015** Document FASE-1 completion | Comments or status update
   - **Commit:** `docs(types): mark FASE-1 complete, document type coverage`
   - **Acceptance:**
     - All FASE-1 deliverables confirmed complete
