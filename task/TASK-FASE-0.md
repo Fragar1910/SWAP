@@ -111,7 +111,7 @@
 **Purpose:** Install dependencies and configure tooling.
 **Checkpoint:** All dependencies installed, builds complete without errors.
 
-- [ ] **TASK-F0-006** [P] Configure Rust program dependencies | `programs/swap-program/Cargo.toml`
+- [x] **TASK-F0-006** [P] Configure Rust program dependencies | `programs/swap-program/Cargo.toml`
   - **Commit:** `chore(bootstrap): add Anchor dependencies to program`
   - **Acceptance:**
     - `anchor-lang = "0.31.0"` added to [dependencies]
