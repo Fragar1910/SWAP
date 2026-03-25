@@ -158,7 +158,7 @@
     - [ ] TypeScript compilation succeeds
     - [ ] Test imports resolve correctly
 
-- [ ] **TASK-F0-009** [P] Create empty test skeleton | `tests/swap-program.ts`
+- [x] **TASK-F0-009** [P] Create empty test skeleton | `tests/swap-program.ts`
   - **Commit:** `test(bootstrap): create test skeleton for integration tests`
   - **Acceptance:**
     - Test file imports Anchor, Program, and workspace
