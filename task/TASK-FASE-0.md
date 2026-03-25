@@ -144,7 +144,7 @@
     - [ ] All dependencies resolved without conflicts
     - [ ] TypeScript version >= 5.3.0
 
-- [ ] **TASK-F0-008** [P] Configure TypeScript compiler | `tsconfig.json`
+- [x] **TASK-F0-008** [P] Configure TypeScript compiler | `tsconfig.json`
   - **Commit:** `chore(bootstrap): configure TypeScript for tests`
   - **Acceptance:**
     - `tsconfig.json` created with Mocha types
