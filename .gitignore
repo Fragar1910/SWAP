@@ -1,0 +1,21 @@
+# Anchor
+.anchor
+target/
+**/*.rs.bk
+test-ledger/
+
+# Node
+node_modules/
+dist/
+.DS_Store
+
+# IDL
+*.so
+*.node
+
+# Solana
+.anchor
+test-ledger
+
+# Build artifacts
+Cargo.lock

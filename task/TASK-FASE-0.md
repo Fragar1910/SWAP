@@ -33,7 +33,7 @@
 **Purpose:** Install toolchain and initialize project structure.
 **Checkpoint:** `anchor build` completes successfully with empty program.
 
-- [ ] **TASK-F0-001** Install Solana CLI | `~/.local/share/solana/install`
+- [x] **TASK-F0-001** Install Solana CLI | `~/.local/share/solana/install`
   - **Commit:** `chore(bootstrap): install Solana CLI 1.18.0`
   - **Acceptance:**
     - Solana CLI version >= 1.18.0 installed
@@ -46,7 +46,7 @@
     - [ ] Version is 1.18.0 or higher
     - [ ] No installation errors logged
 
-- [ ] **TASK-F0-002** Install Anchor CLI | `~/.cargo/bin/anchor`
+- [x] **TASK-F0-002** Install Anchor CLI | `~/.cargo/bin/anchor`
   - **Commit:** `chore(bootstrap): install Anchor CLI 0.31.0`
   - **Acceptance:**
     - Anchor CLI version 0.31.0 installed
@@ -60,7 +60,7 @@
     - [ ] Version matches 0.31.0 exactly
     - [ ] No Rust compilation errors
 
-- [ ] **TASK-F0-003** Initialize Anchor project | `Anchor.toml`, `programs/`, `tests/`
+- [x] **TASK-F0-003** Initialize Anchor project | `Anchor.toml`, `programs/`, `tests/`
   - **Commit:** `chore(bootstrap): initialize Anchor project structure`
   - **Acceptance:**
     - `anchor init` command executes successfully
@@ -76,7 +76,7 @@
     - [ ] `Anchor.toml` has correct cluster config (localnet)
     - [ ] Program compiles with `anchor build` (empty program)
 
-- [ ] **TASK-F0-004** Configure Solana local validator | `~/.config/solana/id.json`
+- [x] **TASK-F0-004** Configure Solana local validator | `~/.config/solana/id.json`
   - **Commit:** `chore(bootstrap): configure Solana for local development`
   - **Acceptance:**
     - Solana config set to localhost cluster
@@ -180,7 +180,7 @@
 **Purpose:** Validate entire bootstrap phase is functional.
 **Checkpoint:** All FASE-0 acceptance criteria verified.
 
-- [ ] **TASK-F0-010** Build empty program and verify artifacts | `target/deploy/`, `target/idl/`
+- [x] **TASK-F0-010** Build empty program and verify artifacts | `target/deploy/`, `target/idl/`
   - **Commit:** `chore(bootstrap): verify build artifacts generation`
   - **Acceptance:**
     - `anchor build` completes without errors
@@ -196,7 +196,7 @@
     - [ ] IDL contains program ID and empty instructions array
     - [ ] No Rust compiler warnings
 
-- [ ] **TASK-F0-011** Run skeleton test suite | Test pass
+- [x] **TASK-F0-011** Run skeleton test suite | Test pass
   - **Commit:** `test(bootstrap): verify test framework functionality`
   - **Acceptance:**
     - `anchor test` completes successfully
@@ -212,7 +212,7 @@
     - [ ] Program ID logged matches Anchor.toml
     - [ ] Validator logs show program deployment
 
-- [ ] **TASK-F0-012** Document FASE-0 completion and verification | `docs/SETUP.md` or README update
+- [x] **TASK-F0-012** Document FASE-0 completion and verification | `docs/SETUP.md` or README update
   - **Commit:** `docs(bootstrap): document environment setup completion`
   - **Acceptance:**
     - Document lists:
