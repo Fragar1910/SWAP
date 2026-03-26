@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAnchor } from '../contexts/AnchorContext';
 import { useAnchorWallet } from '@solana/wallet-adapter-react';
 import { PublicKey } from '@solana/web3.js';
@@ -48,7 +48,7 @@ const SwapInterface: React.FC = () => {
     }
   }, [inputAmount, price, swapAToB]);
 
-  const fetchBalances = async () => {
+  const fetchBalances = useCallback(async () => {
     try {
       if (!program || !wallet || !marketAddress) return;
 
@@ -86,7 +86,7 @@ const SwapInterface: React.FC = () => {
     } catch (error: any) {
       console.error('Error fetching balances:', error);
     }
-  };
+  }, [program, wallet, marketAddress, connection]);
 
   const handleSwap = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -139,7 +139,7 @@ const SwapInterface: React.FC = () => {
       setSwapStatus('Executing swap...');
 
       // Call swap instruction
-      const tx = await program.methods
+      const tx = await (program.methods as any)
         .swap(amountBN, swapAToB)
         .accounts({
           market: market,

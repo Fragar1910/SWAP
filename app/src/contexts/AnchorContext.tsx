@@ -2,7 +2,6 @@ import React, { createContext, useContext, useMemo } from 'react';
 import { AnchorProvider, Program } from '@coral-xyz/anchor';
 import { useAnchorWallet } from '@solana/wallet-adapter-react';
 import { Connection, PublicKey } from '@solana/web3.js';
-import { SwapProgram } from '../types/swap_program';
 import idl from '../idl/swap_program.json';
 
 // Network configuration
@@ -10,7 +9,7 @@ const NETWORK = 'http://127.0.0.1:8899'; // localnet
 const PROGRAM_ID = new PublicKey(idl.address);
 
 interface AnchorContextType {
-  program: Program<SwapProgram> | null;
+  program: any | null; // Using any to avoid strict typing issues with Anchor v0.31
   connection: Connection;
   programId: PublicKey;
 }
@@ -19,7 +18,7 @@ const AnchorContext = createContext<AnchorContextType>({
   program: null,
   connection: new Connection(NETWORK, 'confirmed'),
   programId: PROGRAM_ID,
-} as AnchorContextType);
+});
 
 export const useAnchor = () => useContext(AnchorContext);
 
@@ -39,7 +38,7 @@ export const AnchorProviderComponent: React.FC<{ children: React.ReactNode }> = 
       commitment: 'confirmed',
     });
 
-    return new Program(idl as SwapProgram, provider);
+    return new Program(idl as any, provider);
   }, [wallet, connection]);
 
   const value = {

@@ -65,7 +65,7 @@ const AdminDashboard: React.FC = () => {
       setInitStatus('Sending transaction...');
 
       // Call initialize_market instruction
-      const tx = await program.methods
+      const tx = await (program.methods as any)
         .initializeMarket()
         .accounts({
           market: marketPDADerived,
@@ -117,7 +117,7 @@ const AdminDashboard: React.FC = () => {
       setPriceStatus('Sending transaction...');
 
       // Call set_price instruction
-      const tx = await program.methods
+      const tx = await (program.methods as any)
         .setPrice(priceBN)
         .accounts({
           market: market,
@@ -189,7 +189,7 @@ const AdminDashboard: React.FC = () => {
       setLiquidityStatus('Sending transaction...');
 
       // Call add_liquidity instruction
-      const tx = await program.methods
+      const tx = await (program.methods as any)
         .addLiquidity(amountABN, amountBBN)
         .accounts({
           market: market,
