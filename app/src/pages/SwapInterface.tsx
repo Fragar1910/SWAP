@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAnchor } from '../contexts/AnchorContext';
 import { useAnchorWallet } from '@solana/wallet-adapter-react';
 import { PublicKey } from '@solana/web3.js';
+import { TOKEN_PROGRAM_ID, getAssociatedTokenAddress } from '@solana/spl-token';
+import * as anchor from '@coral-xyz/anchor';
 
 const SwapInterface: React.FC = () => {
-  const { program } = useAnchor();
+  const { program, connection } = useAnchor();
   const wallet = useAnchorWallet();
 
   // Swap state
@@ -13,9 +15,82 @@ const SwapInterface: React.FC = () => {
   const [swapAToB, setSwapAToB] = useState(true); // true = A→B, false = B→A
   const [swapStatus, setSwapStatus] = useState('');
 
-  // Balance display (TODO: fetch from blockchain)
+  // Balance and market data
   const [balanceA, setBalanceA] = useState('0.00');
   const [balanceB, setBalanceB] = useState('0.00');
+  const [expectedOutput, setExpectedOutput] = useState('');
+  const [price, setPrice] = useState(0);
+  const [decimalsA, setDecimalsA] = useState(6);
+  const [decimalsB, setDecimalsB] = useState(9);
+
+  // Fetch balances when wallet or market changes
+  useEffect(() => {
+    if (wallet && program && marketAddress) {
+      fetchBalances();
+    }
+  }, [wallet, program, marketAddress]);
+
+  // Calculate expected output when input changes
+  useEffect(() => {
+    if (inputAmount && price > 0) {
+      const inputFloat = parseFloat(inputAmount);
+      if (!isNaN(inputFloat) && inputFloat > 0) {
+        if (swapAToB) {
+          const outputB = inputFloat * (price / 1_000_000);
+          setExpectedOutput(outputB.toFixed(6));
+        } else {
+          const outputA = inputFloat / (price / 1_000_000);
+          setExpectedOutput(outputA.toFixed(6));
+        }
+      } else {
+        setExpectedOutput('');
+      }
+    } else {
+      setExpectedOutput('');
+    }
+  }, [inputAmount, price, swapAToB]);
+
+  const fetchBalances = async () => {
+    try {
+      if (!program || !wallet || !marketAddress) return;
+
+      const market = new PublicKey(marketAddress);
+      const marketAccount = await program.account.marketAccount.fetch(market);
+
+      // Store price and decimals
+      setPrice(marketAccount.price.toNumber());
+      setDecimalsA(marketAccount.decimalsA);
+      setDecimalsB(marketAccount.decimalsB);
+
+      // Get user token accounts
+      const userTokenA = await getAssociatedTokenAddress(
+        marketAccount.tokenMintA,
+        wallet.publicKey
+      );
+
+      const userTokenB = await getAssociatedTokenAddress(
+        marketAccount.tokenMintB,
+        wallet.publicKey
+      );
+
+      // Fetch balances
+      try {
+        const balA = await connection.getTokenAccountBalance(userTokenA);
+        setBalanceA(balA.value.uiAmountString || '0.00');
+      } catch {
+        setBalanceA('0.00');
+      }
+
+      try {
+        const balB = await connection.getTokenAccountBalance(userTokenB);
+        setBalanceB(balB.value.uiAmountString || '0.00');
+      } catch {
+        setBalanceB('0.00');
+      }
+    } catch (error: any) {
+      console.error('Error fetching balances:', error);
+    }
+  };
 
   const handleSwap = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,11 +100,71 @@ const SwapInterface: React.FC = () => {
     }
 
     try {
+      setSwapStatus('Validating inputs...');
+
+      // Parse market address
+      const market = new PublicKey(marketAddress);
+
+      // Fetch market account
+      const marketAccount = await program.account.marketAccount.fetch(market);
+
+      // Derive vault PDAs
+      const [vaultA] = PublicKey.findProgramAddressSync(
+        [Buffer.from('vault_a'), market.toBuffer()],
+        program.programId
+      );
+
+      const [vaultB] = PublicKey.findProgramAddressSync(
+        [Buffer.from('vault_b'), market.toBuffer()],
+        program.programId
+      );
+
+      // Get user token accounts
+      const userTokenA = await getAssociatedTokenAddress(
+        marketAccount.tokenMintA,
+        wallet.publicKey
+      );
+
+      const userTokenB = await getAssociatedTokenAddress(
+        marketAccount.tokenMintB,
+        wallet.publicKey
+      );
+
+      // Convert input amount to base units
+      const inputFloat = parseFloat(inputAmount);
+      if (isNaN(inputFloat) || inputFloat <= 0) {
+        throw new Error('Amount must be a positive number');
+      }
+
+      const decimals = swapAToB ? marketAccount.decimalsA : marketAccount.decimalsB;
+      const amountScaled = Math.floor(inputFloat * Math.pow(10, decimals));
+      const amountBN = new anchor.BN(amountScaled);
+
       setSwapStatus('Executing swap...');
-      // TODO: Implement swap call (TASK-F4-013, TASK-F4-014, TASK-F4-016)
-      setSwapStatus('Swap executed successfully!');
+
+      // Call swap instruction
+      const tx = await program.methods
+        .swap(amountBN, swapAToB)
+        .accounts({
+          market: market,
+          vaultA: vaultA,
+          vaultB: vaultB,
+          userTokenA: userTokenA,
+          userTokenB: userTokenB,
+          user: wallet.publicKey,
+          tokenProgram: TOKEN_PROGRAM_ID,
+        })
+        .rpc();
+
+      setSwapStatus(`✅ Swap executed successfully!\n\nInput: ${inputFloat} ${swapAToB ? 'Token A' : 'Token B'}\nOutput: ~${expectedOutput} ${swapAToB ? 'Token B' : 'Token A'}\n\nTransaction: ${tx}`);
+
+      // Refresh balances
+      setTimeout(fetchBalances, 1000);
+      setInputAmount('');
+
     } catch (error: any) {
-      setSwapStatus(`Error: ${error.message}`);
+      console.error('Swap error:', error);
+      setSwapStatus(`❌ Error: ${error.message || JSON.stringify(error)}`);
     }
   };
 
@@ -107,12 +242,12 @@ const SwapInterface: React.FC = () => {
           )}
         </form>
 
-        {/* Expected Output Display (TODO: Calculate based on price) */}
-        {inputAmount && (
+        {/* Expected Output Display */}
+        {inputAmount && expectedOutput && (
           <div className="output">
-            <strong>Expected Output:</strong> Calculating...
+            <strong>Expected Output:</strong> ~{expectedOutput} {swapAToB ? 'Token B' : 'Token A'}
             <br />
-            <small>(Price data will be fetched from the market account)</small>
+            <small>Price: {(price / 1_000_000).toFixed(6)} Token B per Token A</small>
           </div>
         )}
       </section>
