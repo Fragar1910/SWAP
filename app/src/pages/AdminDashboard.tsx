@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { useAnchor } from '../contexts/AnchorContext';
 import { useAnchorWallet } from '@solana/wallet-adapter-react';
-import { PublicKey } from '@solana/web3.js';
+import { PublicKey, SystemProgram, SYSVAR_RENT_PUBKEY } from '@solana/web3.js';
+import { TOKEN_PROGRAM_ID, getAssociatedTokenAddress } from '@solana/spl-token';
+import * as anchor from '@coral-xyz/anchor';
 
 const AdminDashboard: React.FC = () => {
   const { program } = useAnchor();
@@ -11,6 +13,7 @@ const AdminDashboard: React.FC = () => {
   const [tokenMintA, setTokenMintA] = useState('');
   const [tokenMintB, setTokenMintB] = useState('');
   const [initStatus, setInitStatus] = useState('');
+  const [marketPDA, setMarketPDA] = useState('');
 
   // Set Price state
   const [priceMarket, setPriceMarket] = useState('');
@@ -31,11 +34,63 @@ const AdminDashboard: React.FC = () => {
     }
 
     try {
-      setInitStatus('Initializing market...');
-      // TODO: Implement initialize market call (TASK-F4-008)
-      setInitStatus('Market initialized successfully!');
+      setInitStatus('Validating token mint addresses...');
+
+      // Parse and validate mint addresses
+      const mintA = new PublicKey(tokenMintA);
+      const mintB = new PublicKey(tokenMintB);
+
+      setInitStatus('Deriving market PDA...');
+
+      // Derive market PDA
+      const [marketPDADerived] = PublicKey.findProgramAddressSync(
+        [
+          Buffer.from('market'),
+          mintA.toBuffer(),
+          mintB.toBuffer(),
+        ],
+        program.programId
+      );
+
+      // Derive vault PDAs
+      const [vaultA] = PublicKey.findProgramAddressSync(
+        [Buffer.from('vault_a'), marketPDADerived.toBuffer()],
+        program.programId
+      );
+
+      const [vaultB] = PublicKey.findProgramAddressSync(
+        [Buffer.from('vault_b'), marketPDADerived.toBuffer()],
+        program.programId
+      );
+
+      setInitStatus('Sending transaction...');
+
+      // Call initialize_market instruction
+      const tx = await program.methods
+        .initializeMarket()
+        .accounts({
+          market: marketPDADerived,
+          tokenMintA: mintA,
+          tokenMintB: mintB,
+          vaultA: vaultA,
+          vaultB: vaultB,
+          authority: wallet.publicKey,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          systemProgram: SystemProgram.programId,
+          rent: SYSVAR_RENT_PUBKEY,
+        })
+        .rpc();
+
+      setInitStatus(`✅ Market initialized successfully!\n\nMarket PDA: ${marketPDADerived.toBase58()}\nVault A: ${vaultA.toBase58()}\nVault B: ${vaultB.toBase58()}\n\nTransaction: ${tx}`);
+      setMarketPDA(marketPDADerived.toBase58());
+
+      // Auto-populate the market address in other forms
+      setPriceMarket(marketPDADerived.toBase58());
+      setLiquidityMarket(marketPDADerived.toBase58());
+
     } catch (error: any) {
-      setInitStatus(`Error: ${error.message}`);
+      console.error('Initialize market error:', error);
+      setInitStatus(`❌ Error: ${error.message || JSON.stringify(error)}`);
     }
   };
 
@@ -47,11 +102,36 @@ const AdminDashboard: React.FC = () => {
     }
 
     try {
-      setPriceStatus('Setting price...');
-      // TODO: Implement set price call (TASK-F4-009)
-      setPriceStatus('Price set successfully!');
+      setPriceStatus('Validating inputs...');
+
+      // Parse market address
+      const market = new PublicKey(priceMarket);
+
+      // Convert price to fixed-point (multiply by 10^6)
+      const priceFloat = parseFloat(price);
+      if (isNaN(priceFloat) || priceFloat <= 0) {
+        throw new Error('Price must be a positive number');
+      }
+
+      const priceScaled = Math.floor(priceFloat * 1_000_000);
+      const priceBN = new anchor.BN(priceScaled);
+
+      setPriceStatus('Sending transaction...');
+
+      // Call set_price instruction
+      const tx = await program.methods
+        .setPrice(priceBN)
+        .accounts({
+          market: market,
+          authority: wallet.publicKey,
+        })
+        .rpc();
+
+      setPriceStatus(`✅ Price set successfully!\n\nNew Price: ${priceFloat} Token B per Token A\n(Internal: ${priceScaled})\n\nTransaction: ${tx}`);
+
     } catch (error: any) {
-      setPriceStatus(`Error: ${error.message}`);
+      console.error('Set price error:', error);
+      setPriceStatus(`❌ Error: ${error.message || JSON.stringify(error)}`);
     }
   };
 
@@ -63,11 +143,72 @@ const AdminDashboard: React.FC = () => {
     }
 
     try {
-      setLiquidityStatus('Adding liquidity...');
-      // TODO: Implement add liquidity call (TASK-F4-010)
-      setLiquidityStatus('Liquidity added successfully!');
+      setLiquidityStatus('Validating inputs...');
+
+      // Parse market address
+      const market = new PublicKey(liquidityMarket);
+
+      // Fetch market account to get token mints and decimals
+      setLiquidityStatus('Fetching market data...');
+      const marketAccount = await program.account.marketAccount.fetch(market);
+
+      // Derive vault PDAs
+      const [vaultA] = PublicKey.findProgramAddressSync(
+        [Buffer.from('vault_a'), market.toBuffer()],
+        program.programId
+      );
+
+      const [vaultB] = PublicKey.findProgramAddressSync(
+        [Buffer.from('vault_b'), market.toBuffer()],
+        program.programId
+      );
+
+      // Get user's associated token accounts
+      const authorityTokenA = await getAssociatedTokenAddress(
+        marketAccount.tokenMintA,
+        wallet.publicKey
+      );
+
+      const authorityTokenB = await getAssociatedTokenAddress(
+        marketAccount.tokenMintB,
+        wallet.publicKey
+      );
+
+      // Convert amounts to base units
+      const amountAFloat = parseFloat(amountA);
+      const amountBFloat = parseFloat(amountB);
+
+      if (isNaN(amountAFloat) || amountAFloat <= 0 || isNaN(amountBFloat) || amountBFloat <= 0) {
+        throw new Error('Amounts must be positive numbers');
+      }
+
+      const amountAScaled = Math.floor(amountAFloat * Math.pow(10, marketAccount.decimalsA));
+      const amountBScaled = Math.floor(amountBFloat * Math.pow(10, marketAccount.decimalsB));
+
+      const amountABN = new anchor.BN(amountAScaled);
+      const amountBBN = new anchor.BN(amountBScaled);
+
+      setLiquidityStatus('Sending transaction...');
+
+      // Call add_liquidity instruction
+      const tx = await program.methods
+        .addLiquidity(amountABN, amountBBN)
+        .accounts({
+          market: market,
+          vaultA: vaultA,
+          vaultB: vaultB,
+          authorityTokenA: authorityTokenA,
+          authorityTokenB: authorityTokenB,
+          authority: wallet.publicKey,
+          tokenProgram: TOKEN_PROGRAM_ID,
+        })
+        .rpc();
+
+      setLiquidityStatus(`✅ Liquidity added successfully!\n\nAmount A: ${amountAFloat} (${amountAScaled} base units)\nAmount B: ${amountBFloat} (${amountBScaled} base units)\n\nTransaction: ${tx}`);
+
     } catch (error: any) {
-      setLiquidityStatus(`Error: ${error.message}`);
+      console.error('Add liquidity error:', error);
+      setLiquidityStatus(`❌ Error: ${error.message || JSON.stringify(error)}`);
     }
   };
 
