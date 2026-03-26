@@ -369,3 +369,472 @@ describe("Administrative Instructions", () => {
     console.log("✅ WF-001 workflow completed successfully");
   });
 });
+
+describe("Swap Instructions", () => {
+  const provider = anchor.AnchorProvider.env();
+  anchor.setProvider(provider);
+
+  const program = anchor.workspace.SwapProgram as Program<SwapProgram>;
+  const authority = provider.wallet as anchor.Wallet;
+
+  // Test token mints
+  let mintA: PublicKey;
+  let mintB: PublicKey;
+
+  // Market and vault PDAs
+  let marketPDA: PublicKey;
+  let vaultA: PublicKey;
+  let vaultB: PublicKey;
+
+  // User keypair and token accounts
+  let user: Keypair;
+  let userTokenA: PublicKey;
+  let userTokenB: PublicKey;
+
+  before("Setup market and user accounts", async () => {
+    console.log("\n=== Setting up swap test environment ===");
+
+    // Create test user
+    user = Keypair.generate();
+    console.log("Test user:", user.publicKey.toBase58());
+
+    // Airdrop SOL to user for transaction fees
+    const airdropSig = await provider.connection.requestAirdrop(
+      user.publicKey,
+      2_000_000_000 // 2 SOL
+    );
+    await provider.connection.confirmTransaction(airdropSig);
+    console.log("Airdropped 2 SOL to user");
+
+    // Create token mints
+    mintA = await createMint(
+      provider.connection,
+      authority.payer,
+      authority.publicKey,
+      null,
+      6 // decimals
+    );
+
+    mintB = await createMint(
+      provider.connection,
+      authority.payer,
+      authority.publicKey,
+      null,
+      9 // decimals
+    );
+
+    // Derive PDAs
+    [marketPDA] = PublicKey.findProgramAddressSync(
+      [Buffer.from("market"), mintA.toBuffer(), mintB.toBuffer()],
+      program.programId
+    );
+
+    [vaultA] = PublicKey.findProgramAddressSync(
+      [Buffer.from("vault_a"), marketPDA.toBuffer()],
+      program.programId
+    );
+
+    [vaultB] = PublicKey.findProgramAddressSync(
+      [Buffer.from("vault_b"), marketPDA.toBuffer()],
+      program.programId
+    );
+
+    // Initialize market
+    await program.methods
+      .initializeMarket()
+      .accounts({
+        market: marketPDA,
+        tokenMintA: mintA,
+        tokenMintB: mintB,
+        vaultA: vaultA,
+        vaultB: vaultB,
+        authority: authority.publicKey,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        systemProgram: SystemProgram.programId,
+        rent: SYSVAR_RENT_PUBKEY,
+      })
+      .rpc();
+
+    // Set price: 1 Token A = 2.5 Token B
+    const price = new anchor.BN(2_500_000);
+    await program.methods
+      .setPrice(price)
+      .accounts({
+        market: marketPDA,
+        authority: authority.publicKey,
+      })
+      .rpc();
+
+    console.log("Market initialized with price = 2.5");
+
+    // Add liquidity to vaults
+    const authTokenA = await getOrCreateAssociatedTokenAccount(
+      provider.connection,
+      authority.payer,
+      mintA,
+      authority.publicKey
+    );
+
+    const authTokenB = await getOrCreateAssociatedTokenAccount(
+      provider.connection,
+      authority.payer,
+      mintB,
+      authority.publicKey
+    );
+
+    // Mint tokens to authority
+    await mintTo(
+      provider.connection,
+      authority.payer,
+      mintA,
+      authTokenA.address,
+      authority.publicKey,
+      10_000_000_000 // 10,000 Token A
+    );
+
+    await mintTo(
+      provider.connection,
+      authority.payer,
+      mintB,
+      authTokenB.address,
+      authority.publicKey,
+      25_000_000_000_000 // 25,000 Token B
+    );
+
+    // Add liquidity: 5000 A, 12500 B
+    await program.methods
+      .addLiquidity(
+        new anchor.BN(5_000_000_000), // 5000 Token A
+        new anchor.BN(12_500_000_000_000) // 12500 Token B
+      )
+      .accounts({
+        market: marketPDA,
+        vaultA: vaultA,
+        vaultB: vaultB,
+        authorityTokenA: authTokenA.address,
+        authorityTokenB: authTokenB.address,
+        authority: authority.publicKey,
+        tokenProgram: TOKEN_PROGRAM_ID,
+      })
+      .rpc();
+
+    console.log("Liquidity added: 5000 A, 12500 B");
+
+    // Create user token accounts
+    const userTokenAccountA = await getOrCreateAssociatedTokenAccount(
+      provider.connection,
+      authority.payer,
+      mintA,
+      user.publicKey
+    );
+    userTokenA = userTokenAccountA.address;
+
+    const userTokenAccountB = await getOrCreateAssociatedTokenAccount(
+      provider.connection,
+      authority.payer,
+      mintB,
+      user.publicKey
+    );
+    userTokenB = userTokenAccountB.address;
+
+    // Mint tokens to user for testing
+    await mintTo(
+      provider.connection,
+      authority.payer,
+      mintA,
+      userTokenA,
+      authority.publicKey,
+      1_000_000_000 // 1000 Token A
+    );
+
+    await mintTo(
+      provider.connection,
+      authority.payer,
+      mintB,
+      userTokenB,
+      authority.publicKey,
+      2_500_000_000_000 // 2500 Token B
+    );
+
+    console.log("User funded: 1000 A, 2500 B\n");
+  });
+
+  it("Swaps Token A to Token B successfully", async () => {
+    const inputAmount = new anchor.BN(100_000_000); // 100 Token A
+
+    // Get balances before swap
+    const userBalanceABefore = await provider.connection.getTokenAccountBalance(userTokenA);
+    const userBalanceBBefore = await provider.connection.getTokenAccountBalance(userTokenB);
+
+    console.log("Before swap:");
+    console.log("  User Token A:", userBalanceABefore.value.uiAmountString);
+    console.log("  User Token B:", userBalanceBBefore.value.uiAmountString);
+
+    // Execute swap: 100 A → 250 B (at price 2.5)
+    await program.methods
+      .swap(inputAmount, true) // true = A→B
+      .accounts({
+        market: marketPDA,
+        vaultA: vaultA,
+        vaultB: vaultB,
+        userTokenA: userTokenA,
+        userTokenB: userTokenB,
+        user: user.publicKey,
+        tokenProgram: TOKEN_PROGRAM_ID,
+      })
+      .signers([user])
+      .rpc();
+
+    // Get balances after swap
+    const userBalanceAAfter = await provider.connection.getTokenAccountBalance(userTokenA);
+    const userBalanceBAfter = await provider.connection.getTokenAccountBalance(userTokenB);
+
+    console.log("After swap:");
+    console.log("  User Token A:", userBalanceAAfter.value.uiAmountString);
+    console.log("  User Token B:", userBalanceBAfter.value.uiAmountString);
+
+    // Verify balances
+    const expectedABalance = 900_000_000; // 1000 - 100
+    const expectedBBalance = 2_750_000_000_000; // 2500 + 250
+
+    expect(userBalanceAAfter.value.amount).to.equal(expectedABalance.toString());
+    expect(userBalanceBAfter.value.amount).to.equal(expectedBBalance.toString());
+
+    console.log("✓ Swap A→B successful: 100 A → 250 B");
+  });
+
+  it("Swaps Token B to Token A successfully", async () => {
+    const inputAmount = new anchor.BN(250_000_000_000); // 250 Token B
+
+    // Get balances before swap
+    const userBalanceABefore = await provider.connection.getTokenAccountBalance(userTokenA);
+    const userBalanceBBefore = await provider.connection.getTokenAccountBalance(userTokenB);
+
+    console.log("Before swap:");
+    console.log("  User Token A:", userBalanceABefore.value.uiAmountString);
+    console.log("  User Token B:", userBalanceBBefore.value.uiAmountString);
+
+    // Execute swap: 250 B → 100 A (at price 2.5)
+    await program.methods
+      .swap(inputAmount, false) // false = B→A
+      .accounts({
+        market: marketPDA,
+        vaultA: vaultA,
+        vaultB: vaultB,
+        userTokenA: userTokenA,
+        userTokenB: userTokenB,
+        user: user.publicKey,
+        tokenProgram: TOKEN_PROGRAM_ID,
+      })
+      .signers([user])
+      .rpc();
+
+    // Get balances after swap
+    const userBalanceAAfter = await provider.connection.getTokenAccountBalance(userTokenA);
+    const userBalanceBAfter = await provider.connection.getTokenAccountBalance(userTokenB);
+
+    console.log("After swap:");
+    console.log("  User Token A:", userBalanceAAfter.value.uiAmountString);
+    console.log("  User Token B:", userBalanceBAfter.value.uiAmountString);
+
+    // Verify balances (should be back to original after roundtrip)
+    const expectedABalance = 1_000_000_000; // 900 + 100 = 1000 (roundtrip)
+    const expectedBBalance = 2_500_000_000_000; // 2750 - 250 = 2500 (roundtrip)
+
+    expect(userBalanceAAfter.value.amount).to.equal(expectedABalance.toString());
+    expect(userBalanceBAfter.value.amount).to.equal(expectedBBalance.toString());
+
+    console.log("✓ Swap B→A successful: 250 B → 100 A (roundtrip complete)");
+  });
+
+  it("Rejects swap with insufficient liquidity", async () => {
+    // Try to swap more than available in vault
+    const hugeAmount = new anchor.BN(100_000_000_000_000); // 100,000 Token B
+
+    try {
+      await program.methods
+        .swap(hugeAmount, false) // Try to get massive amount of A
+        .accounts({
+          market: marketPDA,
+          vaultA: vaultA,
+          vaultB: vaultB,
+          userTokenA: userTokenA,
+          userTokenB: userTokenB,
+          user: user.publicKey,
+          tokenProgram: TOKEN_PROGRAM_ID,
+        })
+        .signers([user])
+        .rpc();
+
+      expect.fail("Transaction should have failed");
+    } catch (error) {
+      expect(error.toString()).to.include("InsufficientLiquidity");
+      console.log("✓ Insufficient liquidity error correctly thrown");
+    }
+  });
+
+  it("Rejects swap with zero amount", async () => {
+    try {
+      await program.methods
+        .swap(new anchor.BN(0), true) // Zero amount
+        .accounts({
+          market: marketPDA,
+          vaultA: vaultA,
+          vaultB: vaultB,
+          userTokenA: userTokenA,
+          userTokenB: userTokenB,
+          user: user.publicKey,
+          tokenProgram: TOKEN_PROGRAM_ID,
+        })
+        .signers([user])
+        .rpc();
+
+      expect.fail("Transaction should have failed");
+    } catch (error) {
+      expect(error.toString()).to.include("InvalidAmount");
+      console.log("✓ Zero amount error correctly thrown");
+    }
+  });
+
+  it("Rejects swap when price not set", async () => {
+    // Create new market without setting price
+    const newMintA = await createMint(
+      provider.connection,
+      authority.payer,
+      authority.publicKey,
+      null,
+      6
+    );
+
+    const newMintB = await createMint(
+      provider.connection,
+      authority.payer,
+      authority.publicKey,
+      null,
+      9
+    );
+
+    const [newMarketPDA] = PublicKey.findProgramAddressSync(
+      [Buffer.from("market"), newMintA.toBuffer(), newMintB.toBuffer()],
+      program.programId
+    );
+
+    const [newVaultA] = PublicKey.findProgramAddressSync(
+      [Buffer.from("vault_a"), newMarketPDA.toBuffer()],
+      program.programId
+    );
+
+    const [newVaultB] = PublicKey.findProgramAddressSync(
+      [Buffer.from("vault_b"), newMarketPDA.toBuffer()],
+      program.programId
+    );
+
+    // Initialize market (price = 0)
+    await program.methods
+      .initializeMarket()
+      .accounts({
+        market: newMarketPDA,
+        tokenMintA: newMintA,
+        tokenMintB: newMintB,
+        vaultA: newVaultA,
+        vaultB: newVaultB,
+        authority: authority.publicKey,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        systemProgram: SystemProgram.programId,
+        rent: SYSVAR_RENT_PUBKEY,
+      })
+      .rpc();
+
+    // Add liquidity without setting price
+    const authTokenA = await getOrCreateAssociatedTokenAccount(
+      provider.connection,
+      authority.payer,
+      newMintA,
+      authority.publicKey
+    );
+
+    const authTokenB = await getOrCreateAssociatedTokenAccount(
+      provider.connection,
+      authority.payer,
+      newMintB,
+      authority.publicKey
+    );
+
+    await mintTo(
+      provider.connection,
+      authority.payer,
+      newMintA,
+      authTokenA.address,
+      authority.publicKey,
+      1_000_000_000
+    );
+
+    await mintTo(
+      provider.connection,
+      authority.payer,
+      newMintB,
+      authTokenB.address,
+      authority.publicKey,
+      1_000_000_000_000
+    );
+
+    await program.methods
+      .addLiquidity(new anchor.BN(100_000_000), new anchor.BN(100_000_000_000))
+      .accounts({
+        market: newMarketPDA,
+        vaultA: newVaultA,
+        vaultB: newVaultB,
+        authorityTokenA: authTokenA.address,
+        authorityTokenB: authTokenB.address,
+        authority: authority.publicKey,
+        tokenProgram: TOKEN_PROGRAM_ID,
+      })
+      .rpc();
+
+    // Create user token accounts for new mints
+    const newUserTokenA = await getOrCreateAssociatedTokenAccount(
+      provider.connection,
+      authority.payer,
+      newMintA,
+      user.publicKey
+    );
+
+    const newUserTokenB = await getOrCreateAssociatedTokenAccount(
+      provider.connection,
+      authority.payer,
+      newMintB,
+      user.publicKey
+    );
+
+    await mintTo(
+      provider.connection,
+      authority.payer,
+      newMintA,
+      newUserTokenA.address,
+      authority.publicKey,
+      100_000_000
+    );
+
+    // Try to swap without price being set
+    try {
+      await program.methods
+        .swap(new anchor.BN(10_000_000), true)
+        .accounts({
+          market: newMarketPDA,
+          vaultA: newVaultA,
+          vaultB: newVaultB,
+          userTokenA: newUserTokenA.address,
+          userTokenB: newUserTokenB.address,
+          user: user.publicKey,
+          tokenProgram: TOKEN_PROGRAM_ID,
+        })
+        .signers([user])
+        .rpc();
+
+      expect.fail("Transaction should have failed");
+    } catch (error) {
+      expect(error.toString()).to.include("PriceNotSet");
+      console.log("✓ Price not set error correctly thrown");
+    }
+  });
+});
