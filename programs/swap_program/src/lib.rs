@@ -6,12 +6,14 @@ pub mod error;
 pub mod events;
 pub mod state;
 pub mod types;
+pub mod utils;
 
 pub use constants::*;
 pub use error::*;
 pub use events::*;
 pub use state::*;
 pub use types::*;
+pub use utils::*;
 
 declare_id!("AGMg3zTXw2DNy2RzBtvxTTt3DCM2EY2LPYXssdanWjV7");
 
@@ -138,6 +140,122 @@ pub mod swap_program {
 
         Ok(())
     }
+
+    /// Execute bidirectional token swap (permissionless)
+    /// Traceability: UC-004, UC-005, REQ-F-006, REQ-F-007, REQ-F-009
+    pub fn swap(ctx: Context<Swap>, amount: u64, swap_a_to_b: bool) -> Result<()> {
+        let market = &ctx.accounts.market;
+        let clock = Clock::get()?;
+
+        // Validate input amount
+        require!(amount > 0, SwapError::InvalidAmount);
+
+        // Calculate output amount using swap_math
+        let output_amount = if swap_a_to_b {
+            swap_math::calculate_a_to_b_output(amount, market)?
+        } else {
+            swap_math::calculate_b_to_a_output(amount, market)?
+        };
+
+        // Prepare PDA signer seeds for vault transfers
+        let market_seeds = &[
+            MARKET_SEED,
+            market.token_mint_a.as_ref(),
+            market.token_mint_b.as_ref(),
+            &[market.bump],
+        ];
+        let signer_seeds = &[&market_seeds[..]];
+
+        if swap_a_to_b {
+            // A → B swap
+            // Check vault B has sufficient liquidity
+            require!(
+                ctx.accounts.vault_b.amount >= output_amount,
+                SwapError::InsufficientLiquidity
+            );
+
+            // Transfer Token A from user to vault_a
+            token::transfer(
+                CpiContext::new(
+                    ctx.accounts.token_program.to_account_info(),
+                    Transfer {
+                        from: ctx.accounts.user_token_a.to_account_info(),
+                        to: ctx.accounts.vault_a.to_account_info(),
+                        authority: ctx.accounts.user.to_account_info(),
+                    },
+                ),
+                amount,
+            )?;
+
+            // Transfer Token B from vault_b to user (PDA signs)
+            token::transfer(
+                CpiContext::new_with_signer(
+                    ctx.accounts.token_program.to_account_info(),
+                    Transfer {
+                        from: ctx.accounts.vault_b.to_account_info(),
+                        to: ctx.accounts.user_token_b.to_account_info(),
+                        authority: market.to_account_info(),
+                    },
+                    signer_seeds,
+                ),
+                output_amount,
+            )?;
+        } else {
+            // B → A swap
+            // Check vault A has sufficient liquidity
+            require!(
+                ctx.accounts.vault_a.amount >= output_amount,
+                SwapError::InsufficientLiquidity
+            );
+
+            // Transfer Token B from user to vault_b
+            token::transfer(
+                CpiContext::new(
+                    ctx.accounts.token_program.to_account_info(),
+                    Transfer {
+                        from: ctx.accounts.user_token_b.to_account_info(),
+                        to: ctx.accounts.vault_b.to_account_info(),
+                        authority: ctx.accounts.user.to_account_info(),
+                    },
+                ),
+                amount,
+            )?;
+
+            // Transfer Token A from vault_a to user (PDA signs)
+            token::transfer(
+                CpiContext::new_with_signer(
+                    ctx.accounts.token_program.to_account_info(),
+                    Transfer {
+                        from: ctx.accounts.vault_a.to_account_info(),
+                        to: ctx.accounts.user_token_a.to_account_info(),
+                        authority: market.to_account_info(),
+                    },
+                    signer_seeds,
+                ),
+                output_amount,
+            )?;
+        }
+
+        emit!(SwapExecuted {
+            market: market.key(),
+            user: ctx.accounts.user.key(),
+            swap_a_to_b,
+            input_amount: amount,
+            output_amount,
+            timestamp: clock.unix_timestamp,
+        });
+
+        msg!(
+            "Swap executed: {} {} → {} {} (rate: {})",
+            if swap_a_to_b { "A→B" } else { "B→A" },
+            amount,
+            if swap_a_to_b { "B" } else { "A" },
+            output_amount,
+            market.price
+        );
+
+        Ok(())
+    }
 }
 
 // Instruction contexts
@@ -205,5 +323,36 @@ pub struct AddLiquidity<'info> {
     #[account(mut)]
     pub authority_token_b: Account<'info, TokenAccount>,
     pub authority: Signer<'info>,
+    pub token_program: Program<'info, Token>,
+}
+
+#[derive(Accounts)]
+pub struct Swap<'info> {
+    pub market: Account<'info, MarketAccount>,
+    #[account(
+        mut,
+        seeds = [VAULT_A_SEED, market.key().as_ref()],
+        bump,
+    )]
+    pub vault_a: Account<'info, TokenAccount>,
+    #[account(
+        mut,
+        seeds = [VAULT_B_SEED, market.key().as_ref()],
+        bump,
+    )]
+    pub vault_b: Account<'info, TokenAccount>,
+    #[account(
+        mut,
+        constraint = user_token_a.mint == market.token_mint_a @ SwapError::Unauthorized,
+        constraint = user_token_a.owner == user.key() @ SwapError::Unauthorized,
+    )]
+    pub user_token_a: Account<'info, TokenAccount>,
+    #[account(
+        mut,
+        constraint = user_token_b.mint == market.token_mint_b @ SwapError::Unauthorized,
+        constraint = user_token_b.owner == user.key() @ SwapError::Unauthorized,
+    )]
+    pub user_token_b: Account<'info, TokenAccount>,
+    pub user: Signer<'info>,
     pub token_program: Program<'info, Token>,
 }
