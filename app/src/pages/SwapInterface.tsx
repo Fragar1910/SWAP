@@ -20,8 +20,6 @@ const SwapInterface: React.FC = () => {
   const [balanceB, setBalanceB] = useState('0.00');
   const [expectedOutput, setExpectedOutput] = useState('');
   const [price, setPrice] = useState(0);
-  const [decimalsA, setDecimalsA] = useState(6);
-  const [decimalsB, setDecimalsB] = useState(9);
 
   // Fetch balances when wallet or market changes
   useEffect(() => {
@@ -57,10 +55,8 @@ const SwapInterface: React.FC = () => {
       const market = new PublicKey(marketAddress);
       const marketAccount = await program.account.marketAccount.fetch(market);
 
-      // Store price and decimals
+      // Store price
       setPrice(marketAccount.price.toNumber());
-      setDecimalsA(marketAccount.decimalsA);
-      setDecimalsB(marketAccount.decimalsB);
 
       // Get user token accounts
       const userTokenA = await getAssociatedTokenAddress(

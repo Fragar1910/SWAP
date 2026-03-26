@@ -13,7 +13,6 @@ const AdminDashboard: React.FC = () => {
   const [tokenMintA, setTokenMintA] = useState('');
   const [tokenMintB, setTokenMintB] = useState('');
   const [initStatus, setInitStatus] = useState('');
-  const [marketPDA, setMarketPDA] = useState('');
 
   // Set Price state
   const [priceMarket, setPriceMarket] = useState('');
@@ -82,7 +81,6 @@ const AdminDashboard: React.FC = () => {
         .rpc();
 
       setInitStatus(`✅ Market initialized successfully!\n\nMarket PDA: ${marketPDADerived.toBase58()}\nVault A: ${vaultA.toBase58()}\nVault B: ${vaultB.toBase58()}\n\nTransaction: ${tx}`);
-      setMarketPDA(marketPDADerived.toBase58());
 
       // Auto-populate the market address in other forms
       setPriceMarket(marketPDADerived.toBase58());
