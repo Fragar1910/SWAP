@@ -14,44 +14,20 @@ const SwapInterface: React.FC = () => {
   const [inputAmount, setInputAmount] = useState('');
   const [swapAToB, setSwapAToB] = useState(true); // true = A→B, false = B→A
   const [swapStatus, setSwapStatus] = useState('');
+  const [isSwapping, setIsSwapping] = useState(false);
 
   // Balance and market data
   const [balanceA, setBalanceA] = useState('0.00');
   const [balanceB, setBalanceB] = useState('0.00');
   const [expectedOutput, setExpectedOutput] = useState('');
   const [price, setPrice] = useState(0);
-
-  // Fetch balances when wallet or market changes
-  useEffect(() => {
-    if (wallet && program && marketAddress) {
-      fetchBalances();
-    }
-  }, [wallet, program, marketAddress]);
-
-  // Calculate expected output when input changes
-  useEffect(() => {
-    if (inputAmount && price > 0) {
-      const inputFloat = parseFloat(inputAmount);
-      if (!isNaN(inputFloat) && inputFloat > 0) {
-        if (swapAToB) {
-          const outputB = inputFloat * (price / 1_000_000);
-          setExpectedOutput(outputB.toFixed(6));
-        } else {
-          const outputA = inputFloat / (price / 1_000_000);
-          setExpectedOutput(outputA.toFixed(6));
-        }
-      } else {
-        setExpectedOutput('');
-      }
-    } else {
-      setExpectedOutput('');
-    }
-  }, [inputAmount, price, swapAToB]);
+  const [isLoadingBalances, setIsLoadingBalances] = useState(false);
 
   const fetchBalances = useCallback(async () => {
     try {
       if (!program || !wallet || !marketAddress) return;
 
+      setIsLoadingBalances(true);
       const market = new PublicKey(marketAddress);
       const marketAccount = await program.account.marketAccount.fetch(market);
 
@@ -85,6 +61,8 @@ const SwapInterface: React.FC = () => {
       }
     } catch (error: any) {
       console.error('Error fetching balances:', error);
+    } finally {
+      setIsLoadingBalances(false);
     }
   }, [program, wallet, marketAddress, connection]);
 
@@ -95,6 +73,7 @@ const SwapInterface: React.FC = () => {
       return;
     }
 
+    setIsSwapping(true);
     try {
       setSwapStatus('Validating inputs...');
 
@@ -154,13 +133,17 @@ const SwapInterface: React.FC = () => {
 
       setSwapStatus(`✅ Swap executed successfully!\n\nInput: ${inputFloat} ${swapAToB ? 'Token A' : 'Token B'}\nOutput: ~${expectedOutput} ${swapAToB ? 'Token B' : 'Token A'}\n\nTransaction: ${tx}`);
 
+      // Clear input
+      setInputAmount('');
+
       // Refresh balances
       setTimeout(fetchBalances, 1000);
-      setInputAmount('');
 
     } catch (error: any) {
       console.error('Swap error:', error);
       setSwapStatus(`❌ Error: ${error.message || JSON.stringify(error)}`);
+    } finally {
+      setIsSwapping(false);
     }
   };
 
@@ -168,6 +151,33 @@ const SwapInterface: React.FC = () => {
     setSwapAToB(!swapAToB);
     setInputAmount(''); // Clear input when direction changes
   };
+
+  // Fetch balances when wallet or market changes
+  useEffect(() => {
+    if (wallet && program && marketAddress) {
+      fetchBalances();
+    }
+  }, [wallet, program, marketAddress, fetchBalances]);
+
+  // Calculate expected output when input changes
+  useEffect(() => {
+    if (inputAmount && price > 0) {
+      const inputFloat = parseFloat(inputAmount);
+      if (!isNaN(inputFloat) && inputFloat > 0) {
+        if (swapAToB) {
+          const outputB = inputFloat * (price / 1_000_000);
+          setExpectedOutput(outputB.toFixed(6));
+        } else {
+          const outputA = inputFloat / (price / 1_000_000);
+          setExpectedOutput(outputA.toFixed(6));
+        }
+      } else {
+        setExpectedOutput('');
+      }
+    } else {
+      setExpectedOutput('');
+    }
+  }, [inputAmount, price, swapAToB]);
 
   return (
     <div className="swap-interface">
@@ -221,14 +231,15 @@ const SwapInterface: React.FC = () => {
           <button
             type="button"
             onClick={toggleSwapDirection}
+            disabled={isSwapping}
             style={{ marginBottom: '1rem', backgroundColor: '#007bff' }}
           >
             🔄 Switch Direction ({swapAToB ? 'A→B' : 'B→A'})
           </button>
 
           {/* Execute Swap */}
-          <button type="submit" disabled={!wallet}>
-            Execute Swap
+          <button type="submit" disabled={!wallet || isSwapping} className={isSwapping ? 'loading' : ''}>
+            {isSwapping ? 'Swapping...' : 'Execute Swap'}
           </button>
 
           {swapStatus && (
@@ -253,12 +264,22 @@ const SwapInterface: React.FC = () => {
         <h2>Your Balances</h2>
         <div className="balance-info">
           <span>Token A:</span>
-          <span>{balanceA}</span>
+          <span>{isLoadingBalances ? 'Loading...' : balanceA}</span>
         </div>
         <div className="balance-info">
           <span>Token B:</span>
-          <span>{balanceB}</span>
+          <span>{isLoadingBalances ? 'Loading...' : balanceB}</span>
         </div>
+        {wallet && marketAddress && (
+          <button
+            type="button"
+            onClick={fetchBalances}
+            disabled={isLoadingBalances}
+            className={`refresh-button ${isLoadingBalances ? 'loading' : ''}`}
+          >
+            {isLoadingBalances ? 'Refreshing...' : '🔄 Refresh Balances'}
+          </button>
+        )}
         {!wallet && (
           <div className="status info" style={{ marginTop: '1rem' }}>
             Connect your wallet to view balances

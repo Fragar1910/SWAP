@@ -13,17 +13,20 @@ const AdminDashboard: React.FC = () => {
   const [tokenMintA, setTokenMintA] = useState('');
   const [tokenMintB, setTokenMintB] = useState('');
   const [initStatus, setInitStatus] = useState('');
+  const [isInitializing, setIsInitializing] = useState(false);
 
   // Set Price state
   const [priceMarket, setPriceMarket] = useState('');
   const [price, setPrice] = useState('');
   const [priceStatus, setPriceStatus] = useState('');
+  const [isSettingPrice, setIsSettingPrice] = useState(false);
 
   // Add Liquidity state
   const [liquidityMarket, setLiquidityMarket] = useState('');
   const [amountA, setAmountA] = useState('');
   const [amountB, setAmountB] = useState('');
   const [liquidityStatus, setLiquidityStatus] = useState('');
+  const [isAddingLiquidity, setIsAddingLiquidity] = useState(false);
 
   const handleInitializeMarket = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,6 +35,7 @@ const AdminDashboard: React.FC = () => {
       return;
     }
 
+    setIsInitializing(true);
     try {
       setInitStatus('Validating token mint addresses...');
 
@@ -86,9 +90,15 @@ const AdminDashboard: React.FC = () => {
       setPriceMarket(marketPDADerived.toBase58());
       setLiquidityMarket(marketPDADerived.toBase58());
 
+      // Clear form
+      setTokenMintA('');
+      setTokenMintB('');
+
     } catch (error: any) {
       console.error('Initialize market error:', error);
       setInitStatus(`❌ Error: ${error.message || JSON.stringify(error)}`);
+    } finally {
+      setIsInitializing(false);
     }
   };
 
@@ -99,6 +109,7 @@ const AdminDashboard: React.FC = () => {
       return;
     }
 
+    setIsSettingPrice(true);
     try {
       setPriceStatus('Validating inputs...');
 
@@ -127,9 +138,14 @@ const AdminDashboard: React.FC = () => {
 
       setPriceStatus(`✅ Price set successfully!\n\nNew Price: ${priceFloat} Token B per Token A\n(Internal: ${priceScaled})\n\nTransaction: ${tx}`);
 
+      // Clear form
+      setPrice('');
+
     } catch (error: any) {
       console.error('Set price error:', error);
       setPriceStatus(`❌ Error: ${error.message || JSON.stringify(error)}`);
+    } finally {
+      setIsSettingPrice(false);
     }
   };
 
@@ -140,6 +156,7 @@ const AdminDashboard: React.FC = () => {
       return;
     }
 
+    setIsAddingLiquidity(true);
     try {
       setLiquidityStatus('Validating inputs...');
 
@@ -204,9 +221,15 @@ const AdminDashboard: React.FC = () => {
 
       setLiquidityStatus(`✅ Liquidity added successfully!\n\nAmount A: ${amountAFloat} (${amountAScaled} base units)\nAmount B: ${amountBFloat} (${amountBScaled} base units)\n\nTransaction: ${tx}`);
 
+      // Clear form
+      setAmountA('');
+      setAmountB('');
+
     } catch (error: any) {
       console.error('Add liquidity error:', error);
       setLiquidityStatus(`❌ Error: ${error.message || JSON.stringify(error)}`);
+    } finally {
+      setIsAddingLiquidity(false);
     }
   };
 
@@ -242,8 +265,8 @@ const AdminDashboard: React.FC = () => {
             />
           </div>
 
-          <button type="submit" disabled={!wallet}>
-            Initialize Market
+          <button type="submit" disabled={!wallet || isInitializing} className={isInitializing ? 'loading' : ''}>
+            {isInitializing ? 'Initializing...' : 'Initialize Market'}
           </button>
 
           {initStatus && (
@@ -283,8 +306,8 @@ const AdminDashboard: React.FC = () => {
             />
           </div>
 
-          <button type="submit" disabled={!wallet}>
-            Set Price
+          <button type="submit" disabled={!wallet || isSettingPrice} className={isSettingPrice ? 'loading' : ''}>
+            {isSettingPrice ? 'Setting Price...' : 'Set Price'}
           </button>
 
           {priceStatus && (
@@ -337,8 +360,8 @@ const AdminDashboard: React.FC = () => {
             />
           </div>
 
-          <button type="submit" disabled={!wallet}>
-            Add Liquidity
+          <button type="submit" disabled={!wallet || isAddingLiquidity} className={isAddingLiquidity ? 'loading' : ''}>
+            {isAddingLiquidity ? 'Adding Liquidity...' : 'Add Liquidity'}
           </button>
 
           {liquidityStatus && (
