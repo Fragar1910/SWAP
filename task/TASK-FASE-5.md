@@ -197,7 +197,7 @@
 **Purpose:** Deploy program to devnet for public testing.
 **Checkpoint:** Program deployed, explorer link accessible.
 
-- [ ] TASK-F5-009 Create deployment script | `scripts/deploy.sh`
+- [x] TASK-F5-009 Create deployment script | `scripts/deploy.sh`
   - **Commit:** `chore(deploy): create automated devnet deployment script`
   - **Acceptance:**
     - Directory created: `scripts/`
