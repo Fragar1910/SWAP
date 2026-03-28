@@ -37,7 +37,7 @@
 **Purpose:** Achieve >80% test coverage with BDD scenario validation.
 **Checkpoint:** All tests pass, coverage target met.
 
-- [ ] TASK-F5-001 Create full integration test file scaffold | `tests/full-integration.ts`
+- [x] TASK-F5-001 Create full integration test file scaffold | `tests/full-integration.ts`
   - **Commit:** `test(integration): create comprehensive integration test suite`
   - **Acceptance:**
     - File created: `tests/full-integration.ts`
