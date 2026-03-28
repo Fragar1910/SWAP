@@ -351,7 +351,7 @@
     - [ ] All major features listed
     - [ ] Version tagged correctly
 
-- [ ] TASK-F5-015 [P] Create API documentation | `docs/API.md`
+- [x] TASK-F5-015 [P] Create API documentation | `docs/API.md`
   - **Commit:** `docs(api): create program API reference documentation`
   - **Acceptance:**
     - Directory created: `docs/`
