@@ -146,7 +146,7 @@
     - [ ] Target < 12,000 CU met
     - [ ] Performance metrics captured
 
-- [ ] TASK-F5-007 Expand unit tests in swap_math.rs | `programs/swap-program/src/utils/swap_math.rs`
+- [x] TASK-F5-007 Expand unit tests in swap_math.rs | `programs/swap_program/src/utils/swap_math.rs`
   - **Commit:** `test(unit): expand swap_math unit tests for edge cases`
   - **Acceptance:**
     - Test module: `#[cfg(test)] mod tests { ... }`

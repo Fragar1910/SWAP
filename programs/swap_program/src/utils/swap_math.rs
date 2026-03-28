@@ -146,4 +146,38 @@ mod tests {
         let result = calculate_a_to_b_output(amount_a, &market);
         assert!(result.is_err());
     }
+
+    #[test]
+    fn test_decimal_mismatch() {
+        // 1 USDC (6 decimals) = 0.05 SOL (9 decimals)
+        let market = create_test_market(50_000, 6, 9);  // price = 0.05
+        let amount_a = 10_000_000;  // 10 USDC
+
+        let result = calculate_a_to_b_output(amount_a, &market).unwrap();
+
+        // Expected: 10 * 0.05 = 0.5 SOL = 500_000_000 base units
+        assert_eq!(result, 500_000_000);
+    }
+
+    #[test]
+    fn test_price_not_set_b_to_a() {
+        let market = create_test_market(0, 6, 6);  // Price = 0
+        let amount_b = 100_000_000;
+
+        let result = calculate_b_to_a_output(amount_b, &market);
+        assert!(result.is_err());
+        assert_eq!(result.unwrap_err(), SwapError::PriceNotSet.into());
+    }
+
+    #[test]
+    fn test_rounding_precision() {
+        // Price = 0.333333 (333_333 with 6 decimals)
+        let market = create_test_market(333_333, 6, 6);
+        let amount_a = 3_000_000;  // 3 tokens
+
+        let result = calculate_a_to_b_output(amount_a, &market).unwrap();
+
+        // Expected: 3 × 0.333333 = 0.999999 ≈ 999_999 base units
+        assert!(result >= 999_998 && result <= 1_000_000);  // Allow rounding variance
+    }
 }
