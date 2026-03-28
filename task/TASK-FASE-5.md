@@ -170,7 +170,7 @@
     - [ ] Decimal mismatch case covered
     - [ ] All `cargo test` passes
 
-- [ ] TASK-F5-008 Measure test coverage with cargo tarpaulin | Documentation
+- [x] TASK-F5-008 Measure test coverage with cargo tarpaulin | Documentation
   - **Commit:** `test(coverage): measure and document test coverage`
   - **Acceptance:**
     - Install tarpaulin: `cargo install cargo-tarpaulin` (if not installed)
