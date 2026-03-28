@@ -374,7 +374,7 @@
     - [ ] Account structures complete
     - [ ] Examples correct
 
-- [ ] TASK-F5-016 Document deployment checklist | `docs/DEPLOYMENT.md`
+- [x] TASK-F5-016 Document deployment checklist | `docs/DEPLOYMENT.md`
   - **Commit:** `docs(deploy): create production deployment checklist`
   - **Acceptance:**
     - File created: `docs/DEPLOYMENT.md`
