@@ -325,7 +325,7 @@
     - [ ] Coding standards comprehensive
     - [ ] Examples helpful
 
-- [ ] TASK-F5-014 [P] Create CHANGELOG.md | `CHANGELOG.md`
+- [x] TASK-F5-014 [P] Create CHANGELOG.md | `CHANGELOG.md`
   - **Commit:** `docs(changelog): create project changelog`
   - **Acceptance:**
     - File created: `CHANGELOG.md`
