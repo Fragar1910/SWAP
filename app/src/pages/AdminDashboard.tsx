@@ -4,6 +4,7 @@ import { useAnchorWallet } from '@solana/wallet-adapter-react';
 import { PublicKey, SystemProgram, SYSVAR_RENT_PUBKEY } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID, getAssociatedTokenAddress } from '@solana/spl-token';
 import * as anchor from '@coral-xyz/anchor';
+import { ErrorDisplay } from '../components/common/ErrorDisplay';
 
 const AdminDashboard: React.FC = () => {
   const { program } = useAnchor();
@@ -13,12 +14,14 @@ const AdminDashboard: React.FC = () => {
   const [tokenMintA, setTokenMintA] = useState('');
   const [tokenMintB, setTokenMintB] = useState('');
   const [initStatus, setInitStatus] = useState('');
+  const [initError, setInitError] = useState<string | null>(null);
   const [isInitializing, setIsInitializing] = useState(false);
 
   // Set Price state
   const [priceMarket, setPriceMarket] = useState('');
   const [price, setPrice] = useState('');
   const [priceStatus, setPriceStatus] = useState('');
+  const [priceError, setPriceError] = useState<string | null>(null);
   const [isSettingPrice, setIsSettingPrice] = useState(false);
 
   // Add Liquidity state
@@ -26,16 +29,19 @@ const AdminDashboard: React.FC = () => {
   const [amountA, setAmountA] = useState('');
   const [amountB, setAmountB] = useState('');
   const [liquidityStatus, setLiquidityStatus] = useState('');
+  const [liquidityError, setLiquidityError] = useState<string | null>(null);
   const [isAddingLiquidity, setIsAddingLiquidity] = useState(false);
 
   const handleInitializeMarket = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!program || !wallet) {
-      setInitStatus('Please connect your wallet first');
+      setInitError('Please connect your wallet first');
       return;
     }
 
     setIsInitializing(true);
+    setInitError(null);
+    setInitStatus('');
     try {
       setInitStatus('Validating token mint addresses...');
 
@@ -96,7 +102,8 @@ const AdminDashboard: React.FC = () => {
 
     } catch (error: any) {
       console.error('Initialize market error:', error);
-      setInitStatus(`❌ Error: ${error.message || JSON.stringify(error)}`);
+      setInitError(error.message || JSON.stringify(error));
+      setInitStatus('');
     } finally {
       setIsInitializing(false);
     }
@@ -105,11 +112,13 @@ const AdminDashboard: React.FC = () => {
   const handleSetPrice = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!program || !wallet) {
-      setPriceStatus('Please connect your wallet first');
+      setPriceError('Please connect your wallet first');
       return;
     }
 
     setIsSettingPrice(true);
+    setPriceError(null);
+    setPriceStatus('');
     try {
       setPriceStatus('Validating inputs...');
 
@@ -143,7 +152,8 @@ const AdminDashboard: React.FC = () => {
 
     } catch (error: any) {
       console.error('Set price error:', error);
-      setPriceStatus(`❌ Error: ${error.message || JSON.stringify(error)}`);
+      setPriceError(error.message || JSON.stringify(error));
+      setPriceStatus('');
     } finally {
       setIsSettingPrice(false);
     }
@@ -152,11 +162,13 @@ const AdminDashboard: React.FC = () => {
   const handleAddLiquidity = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!program || !wallet) {
-      setLiquidityStatus('Please connect your wallet first');
+      setLiquidityError('Please connect your wallet first');
       return;
     }
 
     setIsAddingLiquidity(true);
+    setLiquidityError(null);
+    setLiquidityStatus('');
     try {
       setLiquidityStatus('Validating inputs...');
 
@@ -227,7 +239,8 @@ const AdminDashboard: React.FC = () => {
 
     } catch (error: any) {
       console.error('Add liquidity error:', error);
-      setLiquidityStatus(`❌ Error: ${error.message || JSON.stringify(error)}`);
+      setLiquidityError(error.message || JSON.stringify(error));
+      setLiquidityStatus('');
     } finally {
       setIsAddingLiquidity(false);
     }
@@ -265,12 +278,14 @@ const AdminDashboard: React.FC = () => {
             />
           </div>
 
+          <ErrorDisplay error={initError} onDismiss={() => setInitError(null)} />
+
           <button type="submit" disabled={!wallet || isInitializing} className={isInitializing ? 'loading' : ''}>
             {isInitializing ? 'Initializing...' : 'Initialize Market'}
           </button>
 
-          {initStatus && (
-            <div className={`status ${initStatus.includes('Error') ? 'error' : initStatus.includes('successfully') ? 'success' : 'info'}`}>
+          {initStatus && !initError && (
+            <div className={`status ${initStatus.includes('successfully') ? 'success' : 'info'}`}>
               {initStatus}
             </div>
           )}
@@ -306,12 +321,14 @@ const AdminDashboard: React.FC = () => {
             />
           </div>
 
+          <ErrorDisplay error={priceError} onDismiss={() => setPriceError(null)} />
+
           <button type="submit" disabled={!wallet || isSettingPrice} className={isSettingPrice ? 'loading' : ''}>
             {isSettingPrice ? 'Setting Price...' : 'Set Price'}
           </button>
 
-          {priceStatus && (
-            <div className={`status ${priceStatus.includes('Error') ? 'error' : priceStatus.includes('successfully') ? 'success' : 'info'}`}>
+          {priceStatus && !priceError && (
+            <div className={`status ${priceStatus.includes('successfully') ? 'success' : 'info'}`}>
               {priceStatus}
             </div>
           )}
@@ -360,12 +377,14 @@ const AdminDashboard: React.FC = () => {
             />
           </div>
 
+          <ErrorDisplay error={liquidityError} onDismiss={() => setLiquidityError(null)} />
+
           <button type="submit" disabled={!wallet || isAddingLiquidity} className={isAddingLiquidity ? 'loading' : ''}>
             {isAddingLiquidity ? 'Adding Liquidity...' : 'Add Liquidity'}
           </button>
 
-          {liquidityStatus && (
-            <div className={`status ${liquidityStatus.includes('Error') ? 'error' : liquidityStatus.includes('successfully') ? 'success' : 'info'}`}>
+          {liquidityStatus && !liquidityError && (
+            <div className={`status ${liquidityStatus.includes('successfully') ? 'success' : 'info'}`}>
               {liquidityStatus}
             </div>
           )}
