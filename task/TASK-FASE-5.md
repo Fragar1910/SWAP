@@ -301,7 +301,7 @@
     - [ ] Commands tested and accurate
     - [ ] Links valid
 
-- [ ] TASK-F5-013 [P] Write CONTRIBUTING.md for developers | `CONTRIBUTING.md`
+- [x] TASK-F5-013 [P] Write CONTRIBUTING.md for developers | `CONTRIBUTING.md`
   - **Commit:** `docs(contrib): create developer contribution guide`
   - **Acceptance:**
     - File created: `CONTRIBUTING.md`
