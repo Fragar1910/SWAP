@@ -1,0 +1,158 @@
+#!/bin/bash
+set -e
+
+echo "======================================================================"
+echo "Solana Toolchain Fix - Elegant & Permanent Solution"
+echo "======================================================================"
+echo ""
+echo "This script will:"
+echo "1. Remove conflicting Homebrew installations"
+echo "2. Install Solana CLI from official source"
+echo "3. Configure rustup correctly for Solana development"
+echo "4. Verify the installation"
+echo ""
+read -p "Continue? (y/n) " -n 1 -r
+echo
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo "Aborted."
+    exit 1
+fi
+
+# Step 1: Remove Homebrew Solana if installed
+echo ""
+echo "[1/6] Checking for Homebrew Solana installation..."
+if brew list solana &>/dev/null; then
+    echo "⚠️  Removing Homebrew Solana (causes conflicts)..."
+    brew uninstall solana
+    echo "✅ Homebrew Solana removed"
+else
+    echo "✅ No Homebrew Solana found (good)"
+fi
+
+# Step 2: Check if Rust from Homebrew is installed
+echo ""
+echo "[2/6] Checking Rust installation source..."
+RUST_PATH=$(which rustc 2>/dev/null || echo "")
+if [[ $RUST_PATH == *"Cellar"* ]]; then
+    echo "⚠️  Rust from Homebrew detected at: $RUST_PATH"
+    echo "    This can cause conflicts with rustup."
+    echo "    Recommendation: Keep rustup-managed Rust, remove Homebrew Rust"
+    read -p "Remove Homebrew Rust? (y/n) " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        brew uninstall rust
+        echo "✅ Homebrew Rust removed"
+    fi
+fi
+
+# Step 3: Install/Update rustup (official Rust installer)
+echo ""
+echo "[3/6] Ensuring rustup is installed..."
+if ! command -v rustup &> /dev/null; then
+    echo "Installing rustup..."
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+    source "$HOME/.cargo/env"
+    echo "✅ rustup installed"
+else
+    echo "✅ rustup already installed"
+    rustup update
+fi
+
+# Step 4: Install Solana CLI from official source
+echo ""
+echo "[4/6] Installing Solana CLI from official source..."
+
+# Remove old Solana installation if exists
+if [ -d "$HOME/.local/share/solana" ]; then
+    echo "Removing old Solana installation..."
+    rm -rf "$HOME/.local/share/solana"
+fi
+
+# Install Solana CLI
+sh -c "$(curl -sSfL https://release.solana.com/stable/install)"
+
+# Add to PATH for current session
+export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
+
+echo "✅ Solana CLI installed"
+
+# Step 5: Verify installations
+echo ""
+echo "[5/6] Verifying installations..."
+echo ""
+echo "Solana version:"
+solana --version
+
+echo ""
+echo "Rust toolchain:"
+rustc --version
+cargo --version
+
+echo ""
+echo "Anchor version:"
+anchor --version || echo "⚠️  Anchor not installed (install with: cargo install --git https://github.com/coral-xyz/anchor avm --locked --force && avm install latest && avm use latest)"
+
+echo ""
+echo "cargo-build-sbf:"
+cargo-build-sbf --version
+
+# Step 6: Configure shell profile
+echo ""
+echo "[6/6] Configuring shell profile..."
+
+SHELL_PROFILE=""
+if [ -f "$HOME/.zshrc" ]; then
+    SHELL_PROFILE="$HOME/.zshrc"
+elif [ -f "$HOME/.bashrc" ]; then
+    SHELL_PROFILE="$HOME/.bashrc"
+elif [ -f "$HOME/.bash_profile" ]; then
+    SHELL_PROFILE="$HOME/.bash_profile"
+fi
+
+if [ -n "$SHELL_PROFILE" ]; then
+    # Remove old Solana PATH entries
+    sed -i.bak '/solana/d' "$SHELL_PROFILE"
+
+    # Add correct Solana PATH
+    echo "" >> "$SHELL_PROFILE"
+    echo "# Solana CLI" >> "$SHELL_PROFILE"
+    echo 'export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"' >> "$SHELL_PROFILE"
+
+    # Add cargo PATH if not present
+    if ! grep -q 'cargo/env' "$SHELL_PROFILE"; then
+        echo "" >> "$SHELL_PROFILE"
+        echo "# Rust cargo" >> "$SHELL_PROFILE"
+        echo '. "$HOME/.cargo/env"' >> "$SHELL_PROFILE"
+    fi
+
+    echo "✅ Shell profile updated: $SHELL_PROFILE"
+    echo "   Backup saved as: ${SHELL_PROFILE}.bak"
+else
+    echo "⚠️  Could not detect shell profile (manually add Solana to PATH)"
+fi
+
+# Final instructions
+echo ""
+echo "======================================================================"
+echo "✅ Installation Complete!"
+echo "======================================================================"
+echo ""
+echo "Next steps:"
+echo "1. Restart your terminal OR run:"
+echo "   source $SHELL_PROFILE"
+echo ""
+echo "2. Verify toolchain:"
+echo "   solana --version"
+echo "   rustc --version"
+echo "   cargo-build-sbf --version"
+echo ""
+echo "3. Test compilation:"
+echo "   cd /Users/paco/Documents/CodeCrypto/Trabajos/RUST/Practice/SWAP"
+echo "   anchor build"
+echo ""
+echo "4. Deploy to devnet:"
+echo "   solana config set --url https://api.devnet.solana.com"
+echo "   solana airdrop 2"
+echo "   anchor deploy --provider.cluster devnet"
+echo ""
+echo "======================================================================"
