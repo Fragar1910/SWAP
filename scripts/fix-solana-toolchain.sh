@@ -69,10 +69,30 @@ if [ -d "$HOME/.local/share/solana" ]; then
 fi
 
 # Install Solana CLI
+echo "Downloading and installing Solana CLI..."
 sh -c "$(curl -sSfL https://release.solana.com/stable/install)"
+
+# Wait for installation to complete
+sleep 2
 
 # Add to PATH for current session
 export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
+
+# Verify installation directory exists
+if [ ! -d "$HOME/.local/share/solana/install/active_release/bin" ]; then
+    echo "❌ ERROR: Solana installation failed!"
+    echo "   Directory not found: $HOME/.local/share/solana/install/active_release/bin"
+    echo ""
+    echo "Please try installing manually:"
+    echo "   sh -c \"\$(curl -sSfL https://release.solana.com/stable/install)\""
+    exit 1
+fi
+
+# Verify solana binary exists
+if [ ! -f "$HOME/.local/share/solana/install/active_release/bin/solana" ]; then
+    echo "❌ ERROR: Solana binary not found!"
+    exit 1
+fi
 
 echo "✅ Solana CLI installed"
 
@@ -81,7 +101,15 @@ echo ""
 echo "[5/6] Verifying installations..."
 echo ""
 echo "Solana version:"
-solana --version
+"$HOME/.local/share/solana/install/active_release/bin/solana" --version || {
+    echo "❌ ERROR: Solana command failed"
+    echo "   Trying to add to PATH and retry..."
+    export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
+    solana --version || {
+        echo "❌ Still failing. Please check installation."
+        exit 1
+    }
+}
 
 echo ""
 echo "Rust toolchain:"
@@ -90,11 +118,27 @@ cargo --version
 
 echo ""
 echo "Anchor version:"
-anchor --version || echo "⚠️  Anchor not installed (install with: cargo install --git https://github.com/coral-xyz/anchor avm --locked --force && avm install latest && avm use latest)"
+if command -v anchor &> /dev/null; then
+    anchor --version
+else
+    echo "⚠️  Anchor not installed"
+    echo "   Install with: cargo install --git https://github.com/coral-xyz/anchor avm --locked --force && avm install latest && avm use latest"
+fi
 
 echo ""
 echo "cargo-build-sbf:"
-cargo-build-sbf --version
+if command -v cargo-build-sbf &> /dev/null; then
+    cargo-build-sbf --version
+else
+    echo "⚠️  cargo-build-sbf not found in PATH"
+    echo "   This should be provided by Solana CLI. Checking..."
+    if [ -f "$HOME/.cargo/bin/cargo-build-sbf" ]; then
+        "$HOME/.cargo/bin/cargo-build-sbf" --version
+        echo "   ✅ Found at: $HOME/.cargo/bin/cargo-build-sbf"
+    else
+        echo "   ❌ Not found. May need to reinstall Solana CLI."
+    fi
+fi
 
 # Step 6: Configure shell profile
 echo ""
