@@ -2,14 +2,21 @@
 set -e
 
 echo "======================================================================"
-echo "Solana Toolchain Fix - Elegant & Permanent Solution"
+echo "Solana Toolchain Verification - Homebrew Edition"
 echo "======================================================================"
 echo ""
-echo "This script will:"
-echo "1. Remove conflicting Homebrew installations"
-echo "2. Install Solana CLI from official source"
-echo "3. Configure rustup correctly for Solana development"
-echo "4. Verify the installation"
+echo "This script will VERIFY (not install):"
+echo "1. Solana CLI (Homebrew)"
+echo "2. Rust toolchain"
+echo "3. Anchor dependencies"
+echo "4. Shell configuration"
+echo ""
+echo "⚠️  IMPORTANT: This script does NOT install or modify anything!"
+echo "   It only verifies your existing installations."
+echo ""
+echo "Prerequisites:"
+echo "  - brew install solana"
+echo "  - Rust installed (rustup or Homebrew)"
 echo ""
 read -p "Continue? (y/n) " -n 1 -r
 echo
@@ -18,167 +25,46 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     exit 1
 fi
 
-# Step 1: Remove Homebrew Solana if installed
+# Step 1: Verify Homebrew Solana is installed
 echo ""
-echo "[1/6] Checking for Homebrew Solana installation..."
-if brew list solana &>/dev/null; then
-    echo "⚠️  Removing Homebrew Solana (causes conflicts)..."
-    brew uninstall solana
-    echo "✅ Homebrew Solana removed"
+echo "[1/4] Verifying Homebrew Solana installation..."
+if ! command -v solana &> /dev/null; then
+    echo "❌ ERROR: Solana not found!"
+    echo "   Please install with: brew install solana"
+    exit 1
+fi
+
+SOLANA_PATH=$(which solana)
+if [[ $SOLANA_PATH == *"homebrew"* ]] || [[ $SOLANA_PATH == *"Cellar"* ]]; then
+    echo "✅ Homebrew Solana found at: $SOLANA_PATH"
+    solana --version
 else
-    echo "✅ No Homebrew Solana found (good)"
+    echo "⚠️  Solana found at: $SOLANA_PATH"
+    echo "   This may not be the Homebrew version"
 fi
 
-# Step 2: Check if Rust from Homebrew is installed
+# Step 2: Verify Rust installation
 echo ""
-echo "[2/6] Checking Rust installation source..."
-RUST_PATH=$(which rustc 2>/dev/null || echo "")
-if [[ $RUST_PATH == *"Cellar"* ]]; then
-    echo "⚠️  Rust from Homebrew detected at: $RUST_PATH"
-    echo "    This can cause conflicts with rustup."
-    echo "    Recommendation: Keep rustup-managed Rust, remove Homebrew Rust"
-    read -p "Remove Homebrew Rust? (y/n) " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        brew uninstall rust
-        echo "✅ Homebrew Rust removed"
-    fi
-fi
-
-# Step 3: Install/Update rustup (official Rust installer)
-echo ""
-echo "[3/6] Ensuring rustup is installed..."
-if ! command -v rustup &> /dev/null; then
-    echo "Installing rustup..."
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-    source "$HOME/.cargo/env"
-    echo "✅ rustup installed"
-else
-    echo "✅ rustup already installed"
-    rustup update
-fi
-
-# Step 4: Install Solana CLI from official source
-echo ""
-echo "[4/6] Installing Solana CLI from official source..."
-
-# Remove old Solana installation if exists
-if [ -d "$HOME/.local/share/solana" ]; then
-    echo "Removing old Solana installation..."
-    rm -rf "$HOME/.local/share/solana"
-fi
-
-# Install Solana CLI
-echo "Downloading and installing Solana CLI..."
-echo "This may take a few minutes..."
-
-# Create a temporary file for the installer
-INSTALLER_SCRIPT=$(mktemp)
-INSTALL_SUCCESS=false
-
-# Try Anza first (new official source)
-echo "Trying Anza release (https://release.anza.xyz)..."
-if curl -sSfL https://release.anza.xyz -o "$INSTALLER_SCRIPT" 2>&1; then
-    echo "✅ Downloaded from Anza"
-    if sh "$INSTALLER_SCRIPT"; then
-        INSTALL_SUCCESS=true
-        echo "✅ Installation complete"
-    fi
-fi
-
-# If Anza failed, try Solana Foundation
-if [ "$INSTALL_SUCCESS" = false ]; then
-    echo "⚠️  Anza failed or unavailable, trying Solana Foundation..."
-    if curl -sSfL https://release.solana.com/stable/install -o "$INSTALLER_SCRIPT" 2>&1; then
-        echo "✅ Downloaded from Solana Foundation"
-        if sh "$INSTALLER_SCRIPT"; then
-            INSTALL_SUCCESS=true
-            echo "✅ Installation complete"
-        fi
-    fi
-fi
-
-# If both failed, try with --insecure
-if [ "$INSTALL_SUCCESS" = false ]; then
-    echo "⚠️  Both sources failed with SSL, trying --insecure flag..."
-    if curl -sSfLk https://release.anza.xyz -o "$INSTALLER_SCRIPT" 2>&1 || \
-       curl -sSfLk https://release.solana.com/stable/install -o "$INSTALLER_SCRIPT" 2>&1; then
-        echo "✅ Downloaded with --insecure flag"
-        if sh "$INSTALLER_SCRIPT"; then
-            INSTALL_SUCCESS=true
-            echo "✅ Installation complete"
-        fi
-    fi
-fi
-
-# Clean up temporary file
-rm -f "$INSTALLER_SCRIPT"
-
-# Check if installation succeeded
-if [ "$INSTALL_SUCCESS" = false ]; then
-    echo "❌ ERROR: Failed to download and install Solana CLI from all sources"
-    echo ""
-    echo "Tried sources:"
-    echo "- https://release.anza.xyz"
-    echo "- https://release.solana.com/stable/install"
-    echo "- Both with --insecure flag"
-    echo ""
-    echo "Possible causes:"
-    echo "1. Network/SSL issues (curl error 35: SSL_ERROR_SYSCALL)"
-    echo "2. Firewall blocking the connection"
-    echo "3. Both sources are temporarily unavailable"
-    echo ""
-    echo "Solutions:"
-    echo "A) Try installing manually later:"
-    echo "   sh -c \"\$(curl -sSfL https://release.anza.xyz)\""
-    echo "   OR"
-    echo "   sh -c \"\$(curl -sSfL https://release.solana.com/stable/install)\""
-    echo ""
-    echo "B) Use a different network (try your phone's hotspot)"
-    echo ""
-    echo "C) For now, continue with localhost testing:"
-    echo "   - Use solana-test-validator for local testing"
-    echo "   - Skip devnet deployment until network is fixed"
+echo "[2/4] Verifying Rust installation..."
+if ! command -v rustc &> /dev/null; then
+    echo "❌ ERROR: Rust not found!"
+    echo "   Please install Rust first"
     exit 1
 fi
 
-# Wait for installation to complete
-sleep 3
+RUST_PATH=$(which rustc)
+echo "✅ Rust found at: $RUST_PATH"
+rustc --version
 
-# Add to PATH for current session
-export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
-
-# Verify installation directory exists
-if [ ! -d "$HOME/.local/share/solana/install/active_release/bin" ]; then
-    echo "❌ ERROR: Solana installation failed!"
-    echo "   Directory not found: $HOME/.local/share/solana/install/active_release/bin"
-    echo ""
-    echo "Please try installing manually:"
-    echo "   sh -c \"\$(curl -sSfL https://release.solana.com/stable/install)\""
-    exit 1
-fi
-
-# Verify solana binary exists
-if [ ! -f "$HOME/.local/share/solana/install/active_release/bin/solana" ]; then
-    echo "❌ ERROR: Solana binary not found!"
-    exit 1
-fi
-
-echo "✅ Solana CLI installed"
-
-# Step 5: Verify installations
+# Step 3: Verify installations
 echo ""
-echo "[5/6] Verifying installations..."
+echo "[3/4] Verifying installations..."
 echo ""
 echo "Solana version:"
-"$HOME/.local/share/solana/install/active_release/bin/solana" --version || {
+solana --version || {
     echo "❌ ERROR: Solana command failed"
-    echo "   Trying to add to PATH and retry..."
-    export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
-    solana --version || {
-        echo "❌ Still failing. Please check installation."
-        exit 1
-    }
+    echo "   Make sure Solana is installed with: brew install solana"
+    exit 1
 }
 
 echo ""
@@ -210,9 +96,9 @@ else
     fi
 fi
 
-# Step 6: Configure shell profile
+# Step 4: Configure shell profile
 echo ""
-echo "[6/6] Configuring shell profile..."
+echo "[4/4] Configuring shell profile..."
 
 SHELL_PROFILE=""
 if [ -f "$HOME/.zshrc" ]; then
@@ -224,47 +110,46 @@ elif [ -f "$HOME/.bash_profile" ]; then
 fi
 
 if [ -n "$SHELL_PROFILE" ]; then
-    # Remove old Solana PATH entries
-    sed -i.bak '/solana/d' "$SHELL_PROFILE"
-
-    # Add correct Solana PATH
-    echo "" >> "$SHELL_PROFILE"
-    echo "# Solana CLI" >> "$SHELL_PROFILE"
-    echo 'export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"' >> "$SHELL_PROFILE"
-
     # Add cargo PATH if not present
     if ! grep -q 'cargo/env' "$SHELL_PROFILE"; then
         echo "" >> "$SHELL_PROFILE"
         echo "# Rust cargo" >> "$SHELL_PROFILE"
         echo '. "$HOME/.cargo/env"' >> "$SHELL_PROFILE"
+        echo "✅ Shell profile updated: $SHELL_PROFILE"
+        echo "   Added Rust cargo PATH"
+    else
+        echo "✅ Shell profile already configured"
     fi
-
-    echo "✅ Shell profile updated: $SHELL_PROFILE"
-    echo "   Backup saved as: ${SHELL_PROFILE}.bak"
 else
-    echo "⚠️  Could not detect shell profile (manually add Solana to PATH)"
+    echo "⚠️  Could not detect shell profile"
 fi
+
+echo ""
+echo "ℹ️  NOTE: Homebrew Solana PATH is managed by Homebrew automatically"
+echo "   Location: /opt/homebrew/bin/solana"
 
 # Final instructions
 echo ""
 echo "======================================================================"
-echo "✅ Installation Complete!"
+echo "✅ Configuration Complete!"
 echo "======================================================================"
 echo ""
+echo "✅ Homebrew Solana: $(which solana)"
+echo "✅ Rust: $(which rustc)"
+echo "✅ Cargo: $(which cargo)"
+echo ""
 echo "Next steps:"
-echo "1. Restart your terminal OR run:"
-echo "   source $SHELL_PROFILE"
+echo "1. (Optional) Restart your terminal if you added cargo to PATH"
 echo ""
-echo "2. Verify toolchain:"
-echo "   solana --version"
-echo "   rustc --version"
-echo "   cargo-build-sbf --version"
-echo ""
-echo "3. Test compilation:"
+echo "2. Test compilation:"
 echo "   cd /Users/paco/Documents/CodeCrypto/Trabajos/RUST/Practice/SWAP"
 echo "   anchor build"
 echo ""
-echo "4. Deploy to devnet:"
+echo "3. Test on localhost:"
+echo "   solana-test-validator --reset"
+echo "   anchor deploy"
+echo ""
+echo "4. Deploy to devnet (when ready):"
 echo "   solana config set --url https://api.devnet.solana.com"
 echo "   solana airdrop 2"
 echo "   anchor deploy --provider.cluster devnet"
