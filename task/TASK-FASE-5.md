@@ -56,7 +56,7 @@
     - [ ] Airdrops succeed
     - [ ] Mints created with correct decimals
 
-- [ ] TASK-F5-002 [P] Implement BDD Scenario 1: Happy Path | `tests/full-integration.ts`
+- [x] TASK-F5-002 [P] Implement BDD Scenario 1: Happy Path | `tests/full-integration.ts`
   - **Commit:** `test(bdd): add S1 complete market setup and swap workflow`
   - **Acceptance:**
     - Test: `describe("BDD Scenario 1: Happy Path - Complete Market Setup", ...)`
@@ -80,7 +80,7 @@
     - [ ] Assertions verify expected state changes
     - [ ] Test passes consistently
 
-- [ ] TASK-F5-003 [P] Implement BDD Scenario 4: Insufficient Liquidity | `tests/full-integration.ts`
+- [x] TASK-F5-003 [P] Implement BDD Scenario 4: Insufficient Liquidity | `tests/full-integration.ts`
   - **Commit:** `test(bdd): add S4 insufficient liquidity rejection`
   - **Acceptance:**
     - Test: `describe("BDD Scenario 4: Insufficient Liquidity", ...)`
@@ -95,7 +95,7 @@
     - [ ] Error message matches SwapError::InsufficientLiquidity
     - [ ] Test verifies liquidity check works
 
-- [ ] TASK-F5-004 [P] Implement BDD Scenario 7: Unauthorized Access | `tests/full-integration.ts`
+- [x] TASK-F5-004 [P] Implement BDD Scenario 7: Unauthorized Access | `tests/full-integration.ts`
   - **Commit:** `test(bdd): add S7 unauthorized price setting rejection`
   - **Acceptance:**
     - Test: `describe("BDD Scenario 7: Unauthorized Price Setting", ...)`
@@ -110,7 +110,7 @@
     - [ ] Anchor constraint enforcement verified
     - [ ] Non-authority cannot modify market
 
-- [ ] TASK-F5-005 [P] Implement BDD Scenario 10 & 13: Edge Cases | `tests/full-integration.ts`
+- [x] TASK-F5-005 [P] Implement BDD Scenario 10 & 13: Edge Cases | `tests/full-integration.ts`
   - **Commit:** `test(bdd): add S10 zero amount and S13 same-token rejection`
   - **Acceptance:**
     - Test 1: `describe("BDD Scenario 10: Zero Amount Rejection", ...)`
@@ -129,7 +129,7 @@
     - [ ] CRITICAL-001 fix validated
     - [ ] Error messages correct
 
-- [ ] TASK-F5-006 [P] Implement performance benchmark test | `tests/full-integration.ts`
+- [x] TASK-F5-006 [P] Implement performance benchmark test | `tests/full-integration.ts`
   - **Commit:** `test(perf): add compute unit consumption benchmark`
   - **Acceptance:**
     - Test: `describe("Performance: Compute Unit Consumption", ...)`
@@ -407,7 +407,7 @@
 **Purpose:** Verify all FASE-5 and project completion criteria met.
 **Checkpoint:** Project production-ready, all documentation complete.
 
-- [ ] TASK-F5-017 Run full test suite and verify coverage | Documentation
+- [x] TASK-F5-017 Run full test suite and verify coverage | Documentation
   - **Commit:** `test(final): execute full test suite and verify all criteria`
   - **Acceptance:**
     - Commands executed:
