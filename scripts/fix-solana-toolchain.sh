@@ -72,44 +72,74 @@ fi
 echo "Downloading and installing Solana CLI..."
 echo "This may take a few minutes..."
 
+# Create a temporary file for the installer
+INSTALLER_SCRIPT=$(mktemp)
+INSTALL_SUCCESS=false
+
 # Try Anza first (new official source)
 echo "Trying Anza release (https://release.anza.xyz)..."
-if sh -c "$(curl -sSfL https://release.anza.xyz)" 2>/dev/null; then
-    echo "✅ Downloaded from Anza successfully"
-else
-    echo "⚠️  Anza failed, trying Solana Foundation release..."
-    if sh -c "$(curl -sSfL https://release.solana.com/stable/install)" 2>/dev/null; then
-        echo "✅ Downloaded from Solana Foundation successfully"
-    else
-        echo "⚠️  Both sources failed, trying with --insecure flag..."
-        if sh -c "$(curl -sSfLk https://release.anza.xyz)" 2>/dev/null || sh -c "$(curl -sSfLk https://release.solana.com/stable/install)" 2>/dev/null; then
-            echo "✅ Downloaded with --insecure flag"
-        else
-            echo "❌ ERROR: Failed to download Solana installer from all sources"
-            echo ""
-            echo "Tried sources:"
-            echo "- https://release.anza.xyz"
-            echo "- https://release.solana.com/stable/install"
-            echo ""
-            echo "Possible causes:"
-            echo "1. Network/SSL issues"
-            echo "2. Firewall blocking the connection"
-            echo "3. Both sources are temporarily unavailable"
-            echo ""
-            echo "Solutions:"
-            echo "A) Try installing manually later:"
-            echo "   sh -c \"\$(curl -sSfL https://release.anza.xyz)\""
-            echo "   OR"
-            echo "   sh -c \"\$(curl -sSfL https://release.solana.com/stable/install)\""
-            echo ""
-            echo "B) Use a different network (try your phone's hotspot)"
-            echo ""
-            echo "C) For now, continue with localhost testing:"
-            echo "   - Use solana-test-validator for local testing"
-            echo "   - Skip devnet deployment until network is fixed"
-            exit 1
+if curl -sSfL https://release.anza.xyz -o "$INSTALLER_SCRIPT" 2>&1; then
+    echo "✅ Downloaded from Anza"
+    if sh "$INSTALLER_SCRIPT"; then
+        INSTALL_SUCCESS=true
+        echo "✅ Installation complete"
+    fi
+fi
+
+# If Anza failed, try Solana Foundation
+if [ "$INSTALL_SUCCESS" = false ]; then
+    echo "⚠️  Anza failed or unavailable, trying Solana Foundation..."
+    if curl -sSfL https://release.solana.com/stable/install -o "$INSTALLER_SCRIPT" 2>&1; then
+        echo "✅ Downloaded from Solana Foundation"
+        if sh "$INSTALLER_SCRIPT"; then
+            INSTALL_SUCCESS=true
+            echo "✅ Installation complete"
         fi
     fi
+fi
+
+# If both failed, try with --insecure
+if [ "$INSTALL_SUCCESS" = false ]; then
+    echo "⚠️  Both sources failed with SSL, trying --insecure flag..."
+    if curl -sSfLk https://release.anza.xyz -o "$INSTALLER_SCRIPT" 2>&1 || \
+       curl -sSfLk https://release.solana.com/stable/install -o "$INSTALLER_SCRIPT" 2>&1; then
+        echo "✅ Downloaded with --insecure flag"
+        if sh "$INSTALLER_SCRIPT"; then
+            INSTALL_SUCCESS=true
+            echo "✅ Installation complete"
+        fi
+    fi
+fi
+
+# Clean up temporary file
+rm -f "$INSTALLER_SCRIPT"
+
+# Check if installation succeeded
+if [ "$INSTALL_SUCCESS" = false ]; then
+    echo "❌ ERROR: Failed to download and install Solana CLI from all sources"
+    echo ""
+    echo "Tried sources:"
+    echo "- https://release.anza.xyz"
+    echo "- https://release.solana.com/stable/install"
+    echo "- Both with --insecure flag"
+    echo ""
+    echo "Possible causes:"
+    echo "1. Network/SSL issues (curl error 35: SSL_ERROR_SYSCALL)"
+    echo "2. Firewall blocking the connection"
+    echo "3. Both sources are temporarily unavailable"
+    echo ""
+    echo "Solutions:"
+    echo "A) Try installing manually later:"
+    echo "   sh -c \"\$(curl -sSfL https://release.anza.xyz)\""
+    echo "   OR"
+    echo "   sh -c \"\$(curl -sSfL https://release.solana.com/stable/install)\""
+    echo ""
+    echo "B) Use a different network (try your phone's hotspot)"
+    echo ""
+    echo "C) For now, continue with localhost testing:"
+    echo "   - Use solana-test-validator for local testing"
+    echo "   - Skip devnet deployment until network is fixed"
+    exit 1
 fi
 
 # Wait for installation to complete
