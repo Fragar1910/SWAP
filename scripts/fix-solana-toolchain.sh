@@ -70,10 +70,34 @@ fi
 
 # Install Solana CLI
 echo "Downloading and installing Solana CLI..."
-sh -c "$(curl -sSfL https://release.solana.com/stable/install)"
+echo "This may take a few minutes..."
+
+# Try with curl first
+if ! sh -c "$(curl -sSfL https://release.solana.com/stable/install)" 2>/dev/null; then
+    echo "⚠️  curl failed, trying with --insecure flag..."
+    if ! sh -c "$(curl -sSfLk https://release.solana.com/stable/install)" 2>/dev/null; then
+        echo "❌ ERROR: Failed to download Solana installer"
+        echo ""
+        echo "Possible causes:"
+        echo "1. Network/SSL issues"
+        echo "2. Firewall blocking the connection"
+        echo "3. release.solana.com is temporarily unavailable"
+        echo ""
+        echo "Solutions:"
+        echo "A) Try installing manually later:"
+        echo "   sh -c \"\$(curl -sSfL https://release.solana.com/stable/install)\""
+        echo ""
+        echo "B) Use a different network (try your phone's hotspot)"
+        echo ""
+        echo "C) For now, continue with localhost testing:"
+        echo "   - Use solana-test-validator for local testing"
+        echo "   - Skip devnet deployment until network is fixed"
+        exit 1
+    fi
+fi
 
 # Wait for installation to complete
-sleep 2
+sleep 3
 
 # Add to PATH for current session
 export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
