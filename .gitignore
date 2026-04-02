@@ -50,3 +50,8 @@ node_modules/
 
 # Test ledger local
 test-ledger/
+test-validator.log
+
+# Local binaries and scripts
+.local/
+cargo-wrapper.sh

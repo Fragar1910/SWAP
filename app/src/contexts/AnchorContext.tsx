@@ -5,7 +5,7 @@ import { Connection, PublicKey } from '@solana/web3.js';
 import idl from '../idl/swap_program.json';
 
 // Network configuration
-const NETWORK = 'http://127.0.0.1:8899'; // localnet
+const NETWORK = 'http://127.0.0.1:8899'; // localnet https://api.devnet.solana.com para devnet en Solana. Para localnet se usa http://127.0.0.1:8899
 const PROGRAM_ID = new PublicKey(idl.address);
 
 interface AnchorContextType {

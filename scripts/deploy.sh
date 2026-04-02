@@ -1,12 +1,32 @@
 #!/bin/bash
 set -e
 
+# Change to project root directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR/.."
+
 echo "🚀 Deploying Solana SWAP Program to Devnet"
 echo "============================================"
 
-# Build the program
+# Build the program using Solana toolchain directly via PATH
 echo "📦 Building program..."
-anchor build
+
+# Set PATH to use Solana's rust toolchain directly
+export PATH="/Users/paco/.cache/solana/v1.53/platform-tools/rust/bin:$PATH"
+
+cd programs/swap_program
+
+# Build using the Solana toolchain's cargo directly
+cargo build-sbf
+
+cd ../..
+
+# Copy the compiled .so file to target/deploy/ if needed
+mkdir -p target/deploy
+if [ -f "programs/swap_program/target/deploy/swap_program.so" ]; then
+    cp programs/swap_program/target/deploy/swap_program.so target/deploy/swap_program.so
+    echo "✅ Program binary copied to target/deploy/"
+fi
 
 # Generate keypair if not exists
 if [ ! -f "target/deploy/swap_program-keypair.json" ]; then

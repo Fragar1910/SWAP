@@ -1,3 +1,4 @@
+// @ts-nocheck
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { SwapProgram } from "../target/types/swap_program";
@@ -97,7 +98,7 @@ describe("Administrative Instructions", () => {
         tokenProgram: TOKEN_PROGRAM_ID,
         systemProgram: SystemProgram.programId,
         rent: SYSVAR_RENT_PUBKEY,
-      })
+      } as any)
       .rpc();
 
     console.log("Initialize market tx:", tx);
@@ -126,7 +127,7 @@ describe("Administrative Instructions", () => {
       .accounts({
         market: marketPDA,
         authority: authority.publicKey,
-      })
+      } as any)
       .rpc();
 
     console.log("Set price tx:", tx);
@@ -159,7 +160,7 @@ describe("Administrative Instructions", () => {
         .accounts({
           market: marketPDA,
           authority: attacker.publicKey,
-        })
+        } as any)
         .signers([attacker])
         .rpc();
 
@@ -227,7 +228,7 @@ describe("Administrative Instructions", () => {
         authorityTokenB: authorityTokenB,
         authority: authority.publicKey,
         tokenProgram: TOKEN_PROGRAM_ID,
-      })
+      } as any)
       .rpc();
 
     console.log("Add liquidity tx:", tx);
