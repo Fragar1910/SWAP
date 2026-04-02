@@ -18,7 +18,7 @@ pub use state::*;
 pub use types::*;
 pub use utils::*;
 
-declare_id!("AGMg3zTXw2DNy2RzBtvxTTt3DCM2EY2LPYXssdanWjV7");
+declare_id!("9LS4gVshq1ec25NoS5ZGUkoX59K7sm7Tz8woDdNtods9");
 
 #[program]
 pub mod swap_program {
