@@ -1,0 +1,32 @@
+==========================================================
+TOKEN ADDRESSES PARA ADMIN DASHBOARD
+==========================================================
+
+MARKET USDC/SOL
+---------------
+Token Mint A (USDC):
+FirQw8b5DCetNcBec7KL2ydfnitMg8weAWjmp1KsgD2G
+
+Token Mint B (SOL wrapped):
+8bhJGxNm2xn77RHgxVuJWp6qL9H9camqR544qoPy9kCN
+
+
+OTROS TOKENS (OPCIONAL)
+-----------------------
+ETH:
+7BXPgwTj6BgDFJ413ZtaoWLRLz7aVCmgg9vyhotGNhiC
+
+SUI:
+ENvCYDU2esMS4BBL13e81PT4TzRyA9CCgNtzQL3RxMeV
+
+
+INSTRUCCIONES
+-------------
+1. Copia el address completo de USDC
+2. Pégalo en el campo "Token Mint A" del Admin Dashboard
+3. Copia el address completo de SOL
+4. Pégalo en el campo "Token Mint B"
+5. Click "Initialize Market"
+6. Approva la transacción en Phantom
+
+==========================================================

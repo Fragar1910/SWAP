@@ -97,6 +97,25 @@ anchor test --skip-local-validator
 **Salida esperada**:
 ```
   Administrative Instructions
+  Administrative Instructions
+Setting up test environment...
+Program ID: 9LS4gVshq1ec25NoS5ZGUkoX59K7sm7Tz8woDdNtods9
+Authority: 4DnJLcuBuBBCKAKDodMayVGzkBikRQqYv8CaJ36bCNF4
+Mint A created: GewHuA9ESWf85A3Mti7PAeQSmwAWRZdBhzjTz3EQnnYL
+Mint B created: 8sn75cUaLAoNLcqiveqK4yeP26JmsfyWQspxKDuLBvE6
+Market PDA: 3hVhMWfcMaDSjUSvV2z4woPkFir2izegDZHP1a7Yk56J
+Vault A: QvcgRNWRhCbqCm5kyPsnPw583nULDQ8LBhpMjoyz6F7
+Vault B: 5X5mm52tE5XXUnq8EjpVGx6Rnet3MHnu3DYGbFm8gQGB
+Initialize market tx: 2MtbJPLZ8b3N6zy7PaJjxioFAECjDpc3oxNcVMvjRd4zLtnziEQ5oiYPaqAdbRixQnbemo9Loa5cct91rENvJR8t
+Market initialized successfully
+  Authority: 4DnJLcuBuBBCKAKDodMayVGzkBikRQqYv8CaJ36bCNF4
+  Price: 0
+    ✔ Initializes market successfully (479ms)
+Set price tx: 4DpnaDrB71okvWMS3Se9iuPrS4FnD8Tacz8MN4bBibakEtwYWKaTHv51ZGJ18RHzcS3A9wFLPbrFw7f6DsaobtoU
+Price set successfully
+
+Sale este y no el de abajo cooregido
+
 Program ID: AGMg3zTXw2DNy2RzBtvxTTt3DCM2EY2LPYXssdanWjV7
 Authority: 4DnJLcuBuBBCKAKDodMayVGzkBikRQqYv8CaJ36bCNF4
 Setting up test environment...
@@ -229,15 +248,25 @@ Step 4/5: Build and deploy program
 📋 Program binary size: 324K
 
 🚀 Deploying to localhost...
-Program Id: AGMg3zTXw2DNy2RzBtvxTTt3DCM2EY2LPYXssdanWjV7
+Deploying cluster: http://127.0.0.1:8899
+Upgrade authority: /Users/paco/.config/solana/id.json
+Deploying program "swap_program"...
+Program path: /Users/paco/Documents/CodeCrypto/Trabajos/RUST/Practice/SWAP/target/deploy/swap_program.so...
+Program Id: 9LS4gVshq1ec25NoS5ZGUkoX59K7sm7Tz8woDdNtods9
+
+Signature: PNkfFda2CTpdnvfMtYWkPk68UpNeWWaTFGonBQ1n2fmdZiQPzrmFd7qbTREH9wSNEW1iXEk2miJeZYvgcUxZedS
+
+Deploy success
 ✅ Deployment successful!
 
 ======================================================================
 Step 5/5: Deployment Summary
 ======================================================================
 
-📋 Program ID: AGMg3zTXw2DNy2RzBtvxTTt3DCM2EY2LPYXssdanWjV7
+📋 Program ID: 9LS4gVshq1ec25NoS5ZGUkoX59K7sm7Tz8woDdNtods9
 📁 IDL: target/idl/swap_program.json
+
+ target/idl/swap_program.json
 
 ✅ Localhost deployment complete!
 ```
@@ -250,16 +279,16 @@ Step 5/5: Deployment Summary
 
 ```bash
 # Verificar que el programa está deployado
-solana program show AGMg3zTXw2DNy2RzBtvxTTt3DCM2EY2LPYXssdanWjV7
+solana program show 9LS4gVshq1ec25NoS5ZGUkoX59K7sm7Tz8woDdNtods9
 ```
 
 **Salida esperada**:
 ```
-Program Id: AGMg3zTXw2DNy2RzBtvxTTt3DCM2EY2LPYXssdanWjV7
+Program Id: 9LS4gVshq1ec25NoS5ZGUkoX59K7sm7Tz8woDdNtods9
 Owner: BPFLoaderUpgradeab1e11111111111111111111111
-ProgramData Address: 84Ho48CBcCbTdGP6WuWsGKMK25rSBqfvB7tV91fhSBKP
+ProgramData Address: DzwdRhAX6qvddF6b2MqirbbcFXqNbbzNiCqzARokFenx
 Authority: 4DnJLcuBuBBCKAKDodMayVGzkBikRQqYv8CaJ36bCNF4
-Last Deployed In Slot: 55
+Last Deployed In Slot: 8462
 Data Length: 331288 (0x50e18) bytes
 Balance: 2.30696856 SOL
 ```
@@ -284,6 +313,107 @@ spl-token create-token --decimals 9
 
 **Guardar estos addresses** - Los necesitarás para el admin dashboard.
 
+Para crear los tokens en automatico usando el script setup-tokens.sh
+prompt SWAP % bash scripts/setup-tokens.sh                                    
+======================================================================
+🪙 Token Setup Script for Localhost Testing
+======================================================================
+
+This script will create test tokens simulating:
+  - USDC (6 decimals) - Stablecoin
+  - SOL (9 decimals) - Native wrapped
+  - ETH (8 decimals) - Ethereum wrapped
+  - SUI (9 decimals) - Sui wrapped
+
+Each token will be minted to your default wallet.
+
+Continue? (y/n) y
+
+======================================================================
+Creating test tokens...
+======================================================================
+
+[1/4] Creating USDC (6 decimals)...
+✅ USDC: FirQw8b5DCetNcBec7KL2ydfnitMg8weAWjmp1KsgD2G
+   Minted: 1,000,000 USDC
+
+[2/4] Creating SOL wrapped (9 decimals)...
+✅ SOL:  8bhJGxNm2xn77RHgxVuJWp6qL9H9camqR544qoPy9kCN
+   Minted: 10,000 SOL
+
+[3/4] Creating ETH (8 decimals)...
+✅ ETH:  7BXPgwTj6BgDFJ413ZtaoWLRLz7aVCmgg9vyhotGNhiC
+   Minted: 100 ETH
+
+[4/4] Creating SUI (9 decimals)...
+✅ SUI:  ENvCYDU2esMS4BBL13e81PT4TzRyA9CCgNtzQL3RxMeV
+   Minted: 50,000 SUI
+
+======================================================================
+✅ All tokens created and minted successfully!
+======================================================================
+
+📋 Token Addresses (save these for Admin Dashboard):
+
+USDC: FirQw8b5DCetNcBec7KL2ydfnitMg8weAWjmp1KsgD2G
+SOL:  8bhJGxNm2xn77RHgxVuJWp6qL9H9camqR544qoPy9kCN
+ETH:  7BXPgwTj6BgDFJ413ZtaoWLRLz7aVCmgg9vyhotGNhiC
+SUI:  ENvCYDU2esMS4BBL13e81PT4TzRyA9CCgNtzQL3RxMeV
+
+======================================================================
+Next Steps:
+======================================================================
+
+1. Copy these addresses for use in the web app
+
+2. Example Market Setup (USDC/SOL):
+   Token Mint A: FirQw8b5DCetNcBec7KL2ydfnitMg8weAWjmp1KsgD2G
+   Token Mint B: 8bhJGxNm2xn77RHgxVuJWp6qL9H9camqR544qoPy9kCN
+   Price: 50,000,000 (1 USDC = 0.05 SOL)
+   Liquidity: 10,000 USDC, 500 SOL
+
+3. Example Market Setup (ETH/USDC):
+   Token Mint A: 7BXPgwTj6BgDFJ413ZtaoWLRLz7aVCmgg9vyhotGNhiC
+   Token Mint B: FirQw8b5DCetNcBec7KL2ydfnitMg8weAWjmp1KsgD2G
+   Price: 2,000,000,000 (1 ETH = 2,000 USDC)
+   Liquidity: 10 ETH, 20,000 USDC
+
+4. View your token balances:
+   spl-token accounts
+
+5. Access Admin Dashboard:
+   http://localhost:3000/admin
+
+======================================================================
+
+💾 Addresses saved to: token-addresses.txt
+
+pronmpt SWAP% spl-token accounts
+Token                                         Balance
+-----------------------------------------------------
+2aW8iM6Sx8g1MYyYbaAhWwU7WEmSfXvdiMBtPRnirUEW  5000   
+4D1RaTZ3pNk8KPhBDALPjEsmFZ1C7QkkmQrZyqxcqPNR  5000   
+79CCRPvpTmZP4MVEJ3WL3ehAuwb7VGEy9YmxSBqZ14Dy  5000   
+7BXPgwTj6BgDFJ413ZtaoWLRLz7aVCmgg9vyhotGNhiC  100    
+8bhJGxNm2xn77RHgxVuJWp6qL9H9camqR544qoPy9kCN  10000  
+8sn75cUaLAoNLcqiveqK4yeP26JmsfyWQspxKDuLBvE6  4750   
+93A4HLVEwMa4zcAKkAjswQxc1g1e5ayxkRzWasoLJFEU  12500  
+ALt4iEqzUVe61E4Pa9WExcnWAbscTKz2jVQVHqJ8hgWU  900    
+AUjZ3gFik4CwHe1YqwPCHUauoj8QW1mZ7b4HXgUUHqnY  900    
+DQ67ttgrZzequsCYfxt1mZ9meDj7JttqVuY3KUAdhdb8  900    
+DqTUEVPQC5ULVmk2SM1G4PV8qMUC8XHFxicN7c76wTta  1350   
+E4gwAqypiPW6eStGoYnqkX7vMbCYj7bh6xMXN1odazFA  12500  
+ENvCYDU2esMS4BBL13e81PT4TzRyA9CCgNtzQL3RxMeV  50000  
+FirQw8b5DCetNcBec7KL2ydfnitMg8weAWjmp1KsgD2G  1000000
+GNUevnSxs7gxDMfkYbe83yJyp19cqsxoGiuTe4FCvNMD  1350   
+GewHuA9ESWf85A3Mti7PAeQSmwAWRZdBhzjTz3EQnnYL  900    
+GwTiWCVMgAk9FrCBQFBu152CZ5SNyabSC1vTfBtsHjhv  4750   
+H92N9cjwAbWDAfKfHvdhtreLwBt6m4w8ctKpmUv3ZrDe  450    
+HMvSooovYNBVvBcx2GCnfCkHG2SNbUzahgyQAJBkuLVQ  900    
+HkkYokArit8HNFYBpmRoA7Dcim165Csbgs9wGtpZwA92  1000   
+Hszdw6Ldgp7pk8ri8vKGHvEfUKtHD7RqEz1sbP9qDodx  450    
+J91DWMLzkYxiHnVstP2okNWQXpyKbSMbySUj4nhfHi7Y  900    
+
 ---
 
 ## PARTE 3: Configuración de Phantom Wallet
@@ -299,14 +429,28 @@ spl-token create-token --decimals 9
 
 ### Paso 3.2: Cambiar a Localhost
 
-1. Click en **Settings** (⚙️ arriba a la derecha)
-2. Scroll down → **Change Network**
-3. Select **Localhost**
-4. Si no aparece, añadir manualmente:
-   - Click **Custom RPC URL**
-   - URL: `http://127.0.0.1:8899`
-   - Cluster: `localhost`
-   - Save
+**IMPORTANTE**: Phantom debe configurarse con localhost ANTES de solicitar airdrops.
+
+#### Opción A: Usar la configuración predeterminada de Localhost
+
+1. Click en el **menú hamburguesa** (☰ arriba a la izquierda)
+2. Scroll down → **Settings** (⚙️)
+3. Click **Change Network** (o **Developer Settings** → **Change Network**)
+4. Select **Localhost**
+
+#### Opción B: Añadir Custom RPC (si Localhost no aparece)
+
+1. En **Change Network**, click **+ Add Network** o **Custom RPC**
+2. Configurar:
+   - **Network Name**: `Localhost`
+   - **RPC URL**: `http://127.0.0.1:8899`
+   - **Cluster/Environment**: `localhost`
+3. Click **Save**
+4. Seleccionar **Localhost** como red activa
+
+**Verificación**:
+- En la parte superior de Phantom debe aparecer "Localhost" o un indicador de red local
+- El balance debe estar en 0 SOL inicialmente
 
 ✅ **Phantom configurado para localhost**.
 
@@ -314,47 +458,193 @@ spl-token create-token --decimals 9
 
 ### Paso 3.3: Solicitar SOL para tu Wallet
 
-```bash
-# Copiar tu address de Phantom (click en el nombre para copiar)
-# Ejemplo: 9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin
+**Pasos**:
 
-# Enviar SOL a tu Phantom
-solana airdrop 10 9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin
+1. **Copiar tu address de Phantom**:
+   - Click en el nombre de tu wallet en Phantom (parte superior)
+   - Aparecerá tu address (ejemplo: `8c5mvf94gLTQhmWB7AhBWR6GyDSA1uhpVbWo36ESKvjw`)
+   - Click para copiar al portapapeles
+
+2. **Enviar SOL desde terminal**:
+
+```bash
+# Reemplaza TU_PHANTOM_ADDRESS con el address que copiaste
+solana airdrop 10 TU_PHANTOM_ADDRESS
+
+# Ejemplo real (tu address):
+solana airdrop 10 8c5mvf94gLTQhmWB7AhBWR6GyDSA1uhpVbWo36ESKvjw
+```
+
+**Salida esperada**:
+```
+Requesting airdrop of 10 SOL
+
+Signature: ZZcz651UhrENeguS6XtK5CnQsAPbwSwhMGy4ktgsJXBf...
+
+10 SOL
 ```
 
 **Verificar en Phantom**:
+- Refresca Phantom (puede tardar unos segundos)
 - Deberías ver ~10 SOL en tu balance
 
-✅ **Phantom tiene fondos**.
+✅ **Phantom tiene fondos** (SOL nativo para pagar gas fees).
 
 ---
 
 ### Paso 3.4: Crear Cuentas de Token en Phantom
 
-Para poder recibir Token A y Token B necesitas crear cuentas:
+**IMPORTANTE**: Para recibir tokens SPL en Phantom, primero debes crear cuentas asociadas (Associated Token Accounts) para cada token.
+
+#### Paso 3.4.1: Verificar tus Token Addresses
+
+Ya tienes estos tokens creados (de `scripts/setup-tokens.sh`):
 
 ```bash
-# Token A account
-spl-token create-account 7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU
-
-# Token B account
-spl-token create-account EjmyN6qEC1Tf1JxiG1ae7UTJhUxSwk1TCWNWqxWV4J6o
+USDC: FirQw8b5DCetNcBec7KL2ydfnitMg8weAWjmp1KsgD2G  (6 decimals)
+SOL:  8bhJGxNm2xn77RHgxVuJWp6qL9H9camqR544qoPy9kCN  (9 decimals)
+ETH:  7BXPgwTj6BgDFJ413ZtaoWLRLz7aVCmgg9vyhotGNhiC  (8 decimals)
+SUI:  ENvCYDU2esMS4BBL13e81PT4TzRyA9CCgNtzQL3RxMeV  (9 decimals)
 ```
 
-**Mintear tokens a tu wallet** (para testing):
+#### Paso 3.4.2: Crear Cuentas de Token para Phantom
+
+**NOTA**: Usa el flag `--owner` con tu address de Phantom para crear las cuentas en tu wallet:
 
 ```bash
-# Mintear 1000 Token A (6 decimals = 1000000000)
-spl-token mint 7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU 1000
+# Reemplaza TU_PHANTOM_ADDRESS con tu address real
+# Ejemplo: 8c5mvf94gLTQhmWB7AhBWR6GyDSA1uhpVbWo36ESKvjw
 
-# Mintear 1000 Token B (9 decimals = 1000000000000)
-spl-token mint EjmyN6qEC1Tf1JxiG1ae7UTJhUxSwk1TCWNWqxWV4J6o 1000
+# Crear cuenta de USDC en Phantom
+spl-token create-account FirQw8b5DCetNcBec7KL2ydfnitMg8weAWjmp1KsgD2G \
+  --owner TU_PHANTOM_ADDRESS
+
+# Crear cuenta de SOL wrapped en Phantom
+spl-token create-account 8bhJGxNm2xn77RHgxVuJWp6qL9H9camqR544qoPy9kCN \
+  --owner TU_PHANTOM_ADDRESS
+
+# Opcional: ETH y SUI si los vas a usar
+spl-token create-account 7BXPgwTj6BgDFJ413ZtaoWLRLz7aVCmgg9vyhotGNhiC \
+  --owner TU_PHANTOM_ADDRESS
+
+spl-token create-account ENvCYDU2esMS4BBL13e81PT4TzRyA9CCgNtzQL3RxMeV \
+  --owner TU_PHANTOM_ADDRESS
+```
+Hay errores con el fee payer, la solucion es unir y que pague la cuenta de Solana CLI y no la wallet de Phantom.
+Además hay que especificar explicitamente en el comando quien lo hace. Tenemos que mejorar las instrucciones anteriores con:
+spl-token create-account 8bhJGxNm2xn77RHgxVuJWp6qL9H9camqR544qoPy9kCN --owner
+      8c5mvf94gLTQhmWB7AhBWR6GyDSA1uhpVbWo36ESKvjw --fee-payer ~/.config/solana/id.json
+
+# Crear cuenta de USDC en Phantom
+spl-token create-account FirQw8b5DCetNcBec7KL2ydfnitMg8weAWjmp1KsgD2G \
+  --owner 8c5mvf94gLTQhmWB7AhBWR6GyDSA1uhpVbWo36ESKvjw --fee-payer ~/.config/solana/id.json
+
+# Crear cuenta de SOL wrapped en Phantom
+spl-token create-account 8bhJGxNm2xn77RHgxVuJWp6qL9H9camqR544qoPy9kCN \
+  --owner 8c5mvf94gLTQhmWB7AhBWR6GyDSA1uhpVbWo36ESKvjw --fee-payer ~/.config/solana/id.json
+
+# Opcional: ETH y SUI si los vas a usar
+spl-token create-account 7BXPgwTj6BgDFJ413ZtaoWLRLz7aVCmgg9vyhotGNhiC \
+  --owner 8c5mvf94gLTQhmWB7AhBWR6GyDSA1uhpVbWo36ESKvjw --fee-payer ~/.config/solana/id.json
+
+spl-token create-account ENvCYDU2esMS4BBL13e81PT4TzRyA9CCgNtzQL3RxMeV \
+  --owner 8c5mvf94gLTQhmWB7AhBWR6GyDSA1uhpVbWo36ESKvjw --fee-payer ~/.config/solana/id.json
+
+
+**Salida esperada**:
+```
+Creating account 97hniDwujJULj4QtB8yhGqrMf4g7HprLCNUJYgmHJm71
+
+Signature: 5K9e8... [hash]
+```
+```` ejemplo de SUI ultimo comando
+Creating account 4mG2WsbfciLZpiVrUKpd1pE2bdwu9zSyJWigwfb3tzqj
+
+Signature: 3orXennVF4GN7V6pSir4KJckgwzgxJrogsaNjssxBfN2KwCt4ZxdK8d87rcc9AS4zNRjKaqrjDPv6F7HE6AVsDBZ
+````
+
+#### Paso 3.4.3: Mintear Tokens a Phantom (para testing)
+
+**⚠️ IMPORTANTE**: NO puedes mintear directamente a la wallet address de Phantom (`8c5mvf94...`).
+**Debes mintear a la Associated Token Account (ATA)** de cada token.
+
+##### 3.4.3.1: Obtener las Direcciones de las ATAs
+
+Primero, obtén las direcciones de las cuentas de token asociadas:
+
+```bash
+# USDC ATA
+spl-token address --token FirQw8b5DCetNcBec7KL2ydfnitMg8weAWjmp1KsgD2G \
+  --owner 8c5mvf94gLTQhmWB7AhBWR6GyDSA1uhpVbWo36ESKvjw --verbose
+
+# SOL wrapped ATA
+spl-token address --token 8bhJGxNm2xn77RHgxVuJWp6qL9H9camqR544qoPy9kCN \
+  --owner 8c5mvf94gLTQhmWB7AhBWR6GyDSA1uhpVbWo36ESKvjw --verbose
+
+# ETH ATA (opcional)
+spl-token address --token 7BXPgwTj6BgDFJ413ZtaoWLRLz7aVCmgg9vyhotGNhiC \
+  --owner 8c5mvf94gLTQhmWB7AhBWR6GyDSA1uhpVbWo36ESKvjw --verbose
+
+# SUI ATA (opcional)
+spl-token address --token ENvCYDU2esMS4BBL13e81PT4TzRyA9CCgNtzQL3RxMeV \
+  --owner 8c5mvf94gLTQhmWB7AhBWR6GyDSA1uhpVbWo36ESKvjw --verbose
+```
+
+**Salida esperada** (guarda estas direcciones):
+```
+Wallet address: 8c5mvf94gLTQhmWB7AhBWR6GyDSA1uhpVbWo36ESKvjw
+Associated token address: CWh9pYiucc2JuLFoTgWtf1zfYg14qHUA3C9pKnWCZigg  ← USDC ATA
+```
+
+**Tus ATAs reales**:
+- USDC ATA: `CWh9pYiucc2JuLFoTgWtf1zfYg14qHUA3C9pKnWCZigg`
+- SOL ATA: `6kLd7fzFybfhmHfLneScU9qDzjLomm8xJkXpbghmEfnv`
+- ETH ATA: `HHRtK236ATYmMENSbwupGrjAzABNXkHnWMxoaPiAnMzh`
+- SUI ATA: `4mG2WsbfciLZpiVrUKpd1pE2bdwu9zSyJWigwfb3tzqj`
+
+##### 3.4.3.2: Mintear a las ATAs
+
+Ahora mintea usando las **direcciones de las ATAs**, NO la wallet address:
+
+```bash
+# Mintear 1000 USDC a la ATA de USDC
+spl-token mint FirQw8b5DCetNcBec7KL2ydfnitMg8weAWjmp1KsgD2G 1000 \
+  CWh9pYiucc2JuLFoTgWtf1zfYg14qHUA3C9pKnWCZigg
+
+# Mintear 100 SOL wrapped a la ATA de SOL
+spl-token mint 8bhJGxNm2xn77RHgxVuJWp6qL9H9camqR544qoPy9kCN 100 \
+  6kLd7fzFybfhmHfLneScU9qDzjLomm8xJkXpbghmEfnv
+
+# (Opcional) Mintear 10 ETH a la ATA de ETH
+spl-token mint 7BXPgwTj6BgDFJ413ZtaoWLRLz7aVCmgg9vyhotGNhiC 10 \
+  HHRtK236ATYmMENSbwupGrjAzABNXkHnWMxoaPiAnMzh
+
+# (Opcional) Mintear 500 SUI a la ATA de SUI
+spl-token mint ENvCYDU2esMS4BBL13e81PT4TzRyA9CCgNtzQL3RxMeV 500 \
+  4mG2WsbfciLZpiVrUKpd1pE2bdwu9zSyJWigwfb3tzqj
+```
+
+**Salida esperada**:
+```
+Minting 1000 tokens
+  Token: FirQw8b5DCetNcBec7KL2ydfnitMg8weAWjmp1KsgD2G
+  Recipient: CWh9pYiucc2JuLFoTgWtf1zfYg14qHUA3C9pKnWCZigg
+
+Signature: Y2yz5bGUh1EBCK7E5HxAaAB8o9y8rSnJkiPBjf6S12xm...
 ```
 
 **Verificar en Phantom**:
-- Deberías ver ambos tokens listados
+- Refresca Phantom (puede tardar unos segundos)
+- Click en **Tokens** (botón inferior)
+- Deberías ver los tokens listados:
+  - USDC: 1,000
+  - SOL (wrapped): 100
+  - ETH: 10 (opcional)
+  - SUI: 500 (opcional)
 
-✅ **Tokens listos para usar**.
+**Nota**: Los tokens pueden aparecer con nombres genéricos (Unknown Token) en Phantom hasta que añadas metadatos. Pero los balances serán correctos.
+
+✅ **Tokens listos para usar en swaps**.
 
 ---
 
@@ -403,18 +693,36 @@ Abre navegador en: **http://localhost:3000**
 
 **URL**: http://localhost:3000/admin
 
-#### Campos del Formulario:
+#### Tokens Disponibles (de `token-addresses.txt`):
 
-| Campo | Valor | Ejemplo | Explicación |
-|-------|-------|---------|-------------|
-| **Token Mint A** | Address del Token A | `7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU` | Token que se swapeará (input) |
-| **Token Mint B** | Address del Token B | `EjmyN6qEC1Tf1JxiG1ae7UTJhUxSwk1TCWNWqxWV4J6o` | Token que se recibirá (output) |
+```bash
+USDC: FirQw8b5DCetNcBec7KL2ydfnitMg8weAWjmp1KsgD2G  (6 decimals)
+SOL:  8bhJGxNm2xn77RHgxVuJWp6qL9H9camqR544qoPy9kCN  (9 decimals)
+ETH:  7BXPgwTj6BgDFJ413ZtaoWLRLz7aVCmgg9vyhotGNhiC  (8 decimals)
+SUI:  ENvCYDU2esMS4BBL13e81PT4TzRyA9CCgNtzQL3RxMeV  (9 decimals)
+```
+
+#### Ejemplo 1: Market USDC/SOL
+
+| Campo | Valor | Explicación |
+|-------|-------|-------------|
+| **Token Mint A** | `FirQw8b5DCetNcBec7KL2ydfnitMg8weAWjmp1KsgD2G` | USDC (input token) |
+| **Token Mint B** | `8bhJGxNm2xn77RHgxVuJWp6qL9H9camqR544qoPy9kCN` | SOL wrapped (output token) |
+
+#### Ejemplo 2: Market ETH/USDC
+
+| Campo | Valor | Explicación |
+|-------|-------|-------------|
+| **Token Mint A** | `7BXPgwTj6BgDFJ413ZtaoWLRLz7aVCmgg9vyhotGNhiC` | ETH (input token) |
+| **Token Mint B** | `FirQw8b5DCetNcBec7KL2ydfnitMg8weAWjmp1KsgD2G` | USDC (output token) |
 
 #### Pasos:
 
 1. Navegar a http://localhost:3000/admin
 2. Pegar address de **Token A** en campo "Token Mint A"
+   - Ejemplo: `FirQw8b5DCetNcBec7KL2ydfnitMg8weAWjmp1KsgD2G` (USDC)
 3. Pegar address de **Token B** en campo "Token Mint B"
+   - Ejemplo: `8bhJGxNm2xn77RHgxVuJWp6qL9H9camqR544qoPy9kCN` (SOL)
 4. Click **Create Market**
 5. Phantom popup → Click **Approve**
 6. Esperar confirmación (~2 segundos)
@@ -422,10 +730,10 @@ Abre navegador en: **http://localhost:3000**
 **Salida esperada**:
 ```
 ✅ Market initialized successfully!
-Market PDA: BzK8mP4PVx9qE8XyU2L3R7nW5T6...
+Market PDA: 5xK2... [hash derivado de USDC+SOL]
 ```
 
-✅ **Market creado**.
+✅ **Market creado** (USDC/SOL market listo para swaps).
 
 ---
 
@@ -972,6 +1280,309 @@ anchor test --skip-local-validator -- --grep "Initialize market"
 - [ ] Balances verificados en Phantom
 
 ✅ **Si completaste todo**: ¡Felicidades! SWAP DEX funciona perfectamente en localhost.
+
+---
+
+## PARTE 5: Lecciones Aprendidas y Troubleshooting
+
+### 5.1: Problemas Comunes y Soluciones
+
+#### 🔧 Error: "no such command: +toolchain"
+
+**Síntoma**:
+```bash
+error: no such command: `+1.89.0-sbpf-solana-v1.53`
+```
+
+**Causa**: Homebrew's cargo está siendo usado en lugar de rustup's cargo.
+
+**Solución**:
+1. Configurar PATH correctamente en `~/.zshrc`:
+```bash
+export PATH="$HOME/.cargo/bin:$PATH"
+```
+
+2. Recargar configuración:
+```bash
+source ~/.zshrc
+```
+
+3. Verificar:
+```bash
+which cargo  # Debe mostrar: /Users/paco/.cargo/bin/cargo
+```
+
+**Referencia**: Ver `docs/PATH-FIX.md` para detalles completos.
+
+---
+
+#### 🔧 Error: "fee payer is required"
+
+**Síntoma**:
+```bash
+Error: "fee payer is required, please specify a valid fee payer..."
+```
+
+**Causa**: `spl-token` no encuentra la configuración de Solana CLI.
+
+**Solución**:
+```bash
+# Configurar Solana CLI
+solana config set --url http://127.0.0.1:8899
+solana config set --keypair ~/.config/solana/id.json
+
+# Usar flag --fee-payer explícitamente
+spl-token create-account TOKEN_MINT --owner PHANTOM_ADDRESS \
+  --fee-payer ~/.config/solana/id.json
+```
+
+---
+
+#### 🔧 Error: "Account is owned by 11111111..., not TokenProgram"
+
+**Síntoma**:
+```bash
+Error: "Account 8c5m... is owned by 11111111111111111111111111111111,
+not configured program id TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+```
+
+**Causa**: Intentando mintear directamente a la wallet address en lugar de la Associated Token Account (ATA).
+
+**Solución**:
+1. Obtener la dirección de la ATA:
+```bash
+spl-token address --token TOKEN_MINT --owner WALLET_ADDRESS --verbose
+```
+
+2. Mintear a la ATA, NO a la wallet:
+```bash
+# ❌ INCORRECTO
+spl-token mint TOKEN_MINT 1000 WALLET_ADDRESS
+
+# ✅ CORRECTO
+spl-token mint TOKEN_MINT 1000 ATA_ADDRESS
+```
+
+**Ejemplo**:
+```bash
+# Obtener ATA de USDC para Phantom
+spl-token address --token FirQw8b5DCetNcBec7KL2ydfnitMg8weAWjmp1KsgD2G \
+  --owner 8c5mvf94gLTQhmWB7AhBWR6GyDSA1uhpVbWo36ESKvjw --verbose
+# Output: Associated token address: CWh9pYiucc2JuLFoTgWtf1zfYg14qHUA3C9pKnWCZigg
+
+# Mintear a la ATA
+spl-token mint FirQw8b5DCetNcBec7KL2ydfnitMg8weAWjmp1KsgD2G 1000 \
+  CWh9pYiucc2JuLFoTgWtf1zfYg14qHUA3C9pKnWCZigg
+```
+
+---
+
+#### 🔧 Error: "Attempt to load a program that does not exist"
+
+**Síntoma**:
+```
+Transaction simulation failed: Attempt to load a program that does not exist
+```
+
+**Causa**: El IDL del frontend tiene un Program ID antiguo que no coincide con el programa desplegado.
+
+**Solución**:
+1. Verificar Program ID desplegado:
+```bash
+solana program show 9LS4gVshq1ec25NoS5ZGUkoX59K7sm7Tz8woDdNtods9
+```
+
+2. Actualizar IDL del frontend:
+```bash
+cp target/idl/swap_program.json app/src/idl/swap_program.json
+```
+
+3. Reiniciar el servidor frontend:
+```bash
+# Ctrl+C para detener
+yarn start
+```
+
+4. Refrescar navegador en http://localhost:3000
+
+---
+
+#### 🔧 Error: "insufficient funds" al agregar liquidez
+
+**Síntoma**:
+```
+Program log: Error: insufficient funds
+custom program error: 0x1
+```
+
+**Causa**: Intentando agregar más tokens de los que tienes en tu wallet.
+
+**Solución**:
+1. Verificar tus balances:
+```bash
+spl-token accounts --owner PHANTOM_ADDRESS
+```
+
+2. Ajustar cantidades o mintear más tokens:
+```bash
+# Mintear más tokens a la ATA
+spl-token mint TOKEN_MINT CANTIDAD ATA_ADDRESS
+```
+
+**Ejemplo**:
+```bash
+# Si intentas agregar 250 SOL pero solo tienes 100
+# Mintear 200 más
+spl-token mint 8bhJGxNm2xn77RHgxVuJWp6qL9H9camqR544qoPy9kCN 200 \
+  6kLd7fzFybfhmHfLneScU9qDzjLomm8xJkXpbghmEfnv
+```
+
+---
+
+#### 🔧 Tokens no aparecen en Phantom
+
+**Síntoma**: Los tokens están en la blockchain pero Phantom no los muestra.
+
+**Causa**: Phantom no muestra automáticamente tokens SPL sin metadata.
+
+**Solución**:
+
+**Opción 1**: Importar manualmente en Phantom
+1. Abrir Phantom
+2. Click en "Manage Token List"
+3. Click en "+ Add Custom Token"
+4. Pegar el token mint address
+
+**Opción 2**: Confiar en la blockchain (recomendado para testing)
+- Los tokens **están ahí**, verificable con:
+```bash
+spl-token accounts --owner PHANTOM_ADDRESS
+```
+- El Admin Dashboard funcionará correctamente aunque no los veas en Phantom
+
+---
+
+#### 🔧 Error: "Invalid public key input"
+
+**Síntoma**: Error al pegar token address en el formulario.
+
+**Causa**: Address incompleto, con espacios, o mal formateado.
+
+**Solución**:
+1. Verificar longitud del address (debe ser exactamente 44 caracteres):
+```bash
+echo -n 'FirQw8b5DCetNcBec7KL2ydfnitMg8weAWjmp1KsgD2G' | wc -c
+# Output: 44
+```
+
+2. Copiar desde un archivo limpio:
+```bash
+cat token-addresses-for-admin.txt
+```
+
+3. Asegurarse de copiar el address completo sin espacios adicionales
+
+---
+
+### 5.2: Mejores Prácticas Aprendidas
+
+#### ✅ Gestión de PATH
+
+**Problema**: Conflictos entre cargo de Homebrew y rustup.
+
+**Solución**:
+- Siempre mantener `~/.cargo/bin` ANTES de `/opt/homebrew/bin` en PATH
+- Documentar en `~/.zshrc` con comentarios claros
+- Crear wrappers cuando sea necesario (`scripts/anchor-wrapper.sh`)
+
+#### ✅ Creación de Tokens SPL
+
+**Flujo correcto**:
+1. Crear token mint (una sola vez por token)
+2. Crear Associated Token Account (ATA) para cada wallet
+3. Mintear a las ATAs, NO a las wallets
+4. Verificar con `spl-token accounts`
+
+**Script recomendado**: `scripts/setup-tokens.sh` automatiza todo esto.
+
+#### ✅ Sincronización de IDLs
+
+**Problema**: Frontend con IDL desactualizado.
+
+**Solución**:
+- Después de cada `anchor build`, copiar IDL al frontend:
+```bash
+cp target/idl/swap_program.json app/src/idl/swap_program.json
+```
+- Reiniciar el servidor frontend
+- Verificar Program ID en ambos archivos
+
+#### ✅ Testing Incremental
+
+**Orden recomendado**:
+1. Tests unitarios en Rust (`anchor test --skip-local-validator`)
+2. Deployment a localhost
+3. Verificación manual con `solana program show`
+4. Creación de tokens de prueba
+5. Testing con frontend
+6. Verificación de transacciones
+
+#### ✅ Debugging de Transacciones
+
+Cuando falla una transacción:
+1. Leer los logs completos
+2. Identificar el error específico (ej: "insufficient funds", "incorrect program id")
+3. Verificar cuentas involucradas con `solana account ADDRESS`
+4. Verificar balances con `spl-token accounts`
+5. Usar Solana Explorer con custom RPC: `http://127.0.0.1:8899`
+
+---
+
+### 5.3: Checklist de Validación Pre-Testing
+
+Antes de iniciar testing en localhost, verificar:
+
+- [ ] `solana-test-validator` está corriendo
+- [ ] No hay procesos antiguos ocupando puertos (3000, 8899, 8900)
+- [ ] PATH configurado correctamente (`which cargo` → rustup)
+- [ ] Solana CLI apunta a localhost (`solana config get`)
+- [ ] Programa compilado y desplegado (`solana program show PROGRAM_ID`)
+- [ ] IDL del frontend actualizado con Program ID correcto
+- [ ] Tokens creados y balances verificados
+- [ ] Phantom configurado en localhost
+- [ ] Phantom tiene SOL para gas fees
+
+---
+
+### 5.4: Comandos de Utilidad Rápida
+
+```bash
+# Verificar estado del validador
+pgrep -f solana-test-validator || echo "No corriendo"
+
+# Matar validator antiguo
+pkill -f solana-test-validator
+
+# Verificar puertos en uso
+lsof -ti:3000 -ti:8899 -ti:8900
+
+# Limpiar y reiniciar
+pkill -f solana-test-validator
+pkill -f "yarn start"
+sleep 2
+solana-test-validator &
+cd app && yarn start
+
+# Verificar balances rápidamente
+spl-token accounts --owner $(cat ~/.config/solana/phantom-address.txt)
+
+# Copiar IDL al frontend
+cp target/idl/swap_program.json app/src/idl/swap_program.json
+
+# Verificar Program ID match
+grep address target/idl/swap_program.json
+grep address app/src/idl/swap_program.json
+```
 
 ---
 

@@ -1,0 +1,9 @@
+Token Addresses Created: Thu Apr  2 20:37:38 CEST 2026
+====================================
+
+USDC: FirQw8b5DCetNcBec7KL2ydfnitMg8weAWjmp1KsgD2G
+SOL:  8bhJGxNm2xn77RHgxVuJWp6qL9H9camqR544qoPy9kCN
+ETH:  7BXPgwTj6BgDFJ413ZtaoWLRLz7aVCmgg9vyhotGNhiC
+SUI:  ENvCYDU2esMS4BBL13e81PT4TzRyA9CCgNtzQL3RxMeV
+
+Use these in Admin Dashboard to initialize markets.
