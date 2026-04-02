@@ -2,7 +2,7 @@
 
 > **Proyecto**: SWAP - Decentralized Exchange en Solana
 > **Período**: Marzo 24-29, 2026 (5 días)
-> **Equipo**: Paco (Developer) + Claude Code (AI Assistant)
+> **Equipo**: Francisco Hipólito García Martínez (Developer) + Claude Code (AI Assistant)
 > **Resultado**: Proyecto completado exitosamente con testing en localhost
 
 ---
@@ -947,7 +947,7 @@ const program = new Program(idl as any, provider);
 
 ## Reflexiones del Equipo
 
-### De Paco (Developer)
+### De Francisco Hipólito García Martínez (Developer)
 
 **Lo Más Desafiante**:
 
@@ -1167,7 +1167,7 @@ Este proyecto fue un **éxito completo** considerando los objetivos:
 
 ### Agradecimientos
 
-**A Paco**: Por la visión del proyecto, debugging persistente, y especialmente por encontrar la solución de localhost testing cuando devnet estaba bloqueado.
+**A Franciso Hipolito Garcia y CodeCrypto**: Por la visión del proyecto, debugging persistente, y especialmente por encontrar la solución de localhost testing cuando devnet estaba bloqueado.
 
 **A Solana Community**: Por documentación excelente, Anchor framework, y community support en Discord/GitHub.
 
@@ -1198,6 +1198,6 @@ La documentación es exhaustiva.
 ---
 
 **Documento Generado**: Marzo 29, 2026
-**Autor**: Paco + Claude Code
+**Autor**: Francisco Hipolito Garcia Martinez (Fragar1910) + Claude Code
 **Próxima Revisión**: Después de devnet deployment o cada 3 meses
 **Contacto**: Ver repositorio para issues y contribuciones

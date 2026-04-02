@@ -619,6 +619,147 @@ TOKEN_SILVER=$(spl-token create-token --decimals 8 | grep "Creating token" | awk
 | Token A (USDC-like) | 6 | `7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU` | Stablecoin simulado |
 | Token B (SOL-like) | 9 | `EjmyN6qEC1Tf1JxiG1ae7UTJhUxSwk1TCWNWqxWV4J6o` | Native token simulado |
 
+### Tokens Wrapped Reales (Mainnet - Para Referencia)
+
+**⚠️ IMPORTANTE**: Estas direcciones son de **mainnet**. Para localhost debes crear tus propios tokens con `spl-token create-token`.
+
+| Token | Mint Address (Mainnet) | Decimals | Descripción |
+|-------|------------------------|----------|-------------|
+| **USDC** | `EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v` | 6 | USD Coin (Circle) |
+| **USDT** | `Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB` | 6 | Tether USD |
+| **SOL (Wrapped)** | `So11111111111111111111111111111111111111112` | 9 | Wrapped SOL |
+| **ETH (Wormhole)** | `7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs` | 8 | Ethereum (Wormhole Bridge) |
+| **wETH (Portal)** | `FeGn77dhg1KXRRFeSwwMiykZnZPw5JXW6naf2aQgZDQf` | 8 | Wrapped Ethereum (Portal) |
+| **BTC (Portal)** | `3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh` | 8 | Wrapped Bitcoin (Portal) |
+| **SUI (Wormhole)** | `G1vJEgzepqhnVu35SnapDFUvqt73aqEa9wcZLkDzVwmZ` | 9 | Sui (Wormhole Bridge) |
+| **BONK** | `DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263` | 5 | BONK meme token |
+
+**Nota sobre Wrapped Tokens**:
+- **Mainnet**: Estas direcciones funcionan en Solana mainnet-beta
+- **Devnet**: Existen versiones de testnet de algunos tokens (USDC, SOL)
+- **Localhost**: DEBES crear tus propios tokens, mainnet addresses NO funcionan en localhost
+
+### Cómo Usar Estos Tokens en Localhost
+
+**NO puedes usar las direcciones de mainnet directamente**. En su lugar:
+
+#### Opción 1: Crear Tokens Personalizados (Recomendado)
+
+```bash
+# Simular USDC (6 decimals)
+TOKEN_USDC=$(spl-token create-token --decimals 6 | grep "Creating token" | awk '{print $3}')
+echo "USDC simulado: $TOKEN_USDC"
+
+# Simular SOL wrapped (9 decimals)
+TOKEN_SOL=$(spl-token create-token --decimals 9 | grep "Creating token" | awk '{print $3}')
+echo "SOL simulado: $TOKEN_SOL"
+
+# Simular ETH (8 decimals)
+TOKEN_ETH=$(spl-token create-token --decimals 8 | grep "Creating token" | awk '{print $3}')
+echo "ETH simulado: $TOKEN_ETH"
+
+# Simular SUI (9 decimals)
+TOKEN_SUI=$(spl-token create-token --decimals 9 | grep "Creating token" | awk '{print $3}')
+echo "SUI simulado: $TOKEN_SUI"
+```
+
+#### Opción 2: Script Automático de Setup
+
+```bash
+# Crear script de setup de tokens
+cat > setup-tokens.sh << 'EOF'
+#!/bin/bash
+set -e
+
+echo "Creating test tokens for localhost..."
+echo ""
+
+# USDC (6 decimals)
+echo "Creating USDC..."
+USDC=$(spl-token create-token --decimals 6 2>&1 | grep "Creating token" | awk '{print $3}')
+spl-token create-account $USDC
+spl-token mint $USDC 1000000
+echo "✅ USDC: $USDC (1,000,000 minted)"
+
+# SOL (9 decimals)
+echo "Creating SOL..."
+SOL=$(spl-token create-token --decimals 9 2>&1 | grep "Creating token" | awk '{print $3}')
+spl-token create-account $SOL
+spl-token mint $SOL 10000
+echo "✅ SOL: $SOL (10,000 minted)"
+
+# ETH (8 decimals)
+echo "Creating ETH..."
+ETH=$(spl-token create-token --decimals 8 2>&1 | grep "Creating token" | awk '{print $3}')
+spl-token create-account $ETH
+spl-token mint $ETH 100
+echo "✅ ETH: $ETH (100 minted)"
+
+# SUI (9 decimals)
+echo "Creating SUI..."
+SUI=$(spl-token create-token --decimals 9 2>&1 | grep "Creating token" | awk '{print $3}')
+spl-token create-account $SUI
+spl-token mint $SUI 50000
+echo "✅ SUI: $SUI (50,000 minted)"
+
+echo ""
+echo "======================================================================"
+echo "✅ All tokens created and minted!"
+echo "======================================================================"
+echo ""
+echo "Use these addresses in the web app:"
+echo "USDC: $USDC"
+echo "SOL:  $SOL"
+echo "ETH:  $ETH"
+echo "SUI:  $SUI"
+echo ""
+echo "Save these for your testing session!"
+EOF
+
+chmod +x setup-tokens.sh
+bash setup-tokens.sh
+```
+
+### Ejemplo de Market Setup con Tokens Simulados
+
+#### Market 1: USDC/SOL (Stablecoin ↔ Native)
+
+```bash
+# Después de ejecutar setup-tokens.sh, usar los addresses generados:
+
+# En Admin Dashboard:
+Token Mint A: <TU_USDC_ADDRESS>
+Token Mint B: <TU_SOL_ADDRESS>
+
+# Set Price: 50,000,000 (1 USDC = 0.05 SOL, o 1 SOL = 20 USDC)
+# Add Liquidity: 10,000 USDC, 500 SOL
+# Swap Example: 100 USDC → 5 SOL
+```
+
+#### Market 2: ETH/USDC (Crypto ↔ Stablecoin)
+
+```bash
+# En Admin Dashboard:
+Token Mint A: <TU_ETH_ADDRESS>
+Token Mint B: <TU_USDC_ADDRESS>
+
+# Set Price: 2000,000,000 (1 ETH = 2000 USDC)
+# Add Liquidity: 10 ETH, 20,000 USDC
+# Swap Example: 1 ETH → 2000 USDC
+```
+
+#### Market 3: SUI/SOL (Alt L1 ↔ Native)
+
+```bash
+# En Admin Dashboard:
+Token Mint A: <TU_SUI_ADDRESS>
+Token Mint B: <TU_SOL_ADDRESS>
+
+# Set Price: 500,000 (1 SUI = 0.5 SOL, o 1 SOL = 2 SUI)
+# Add Liquidity: 1,000 SUI, 500 SOL
+# Swap Example: 100 SUI → 50 SOL
+```
+
 ### Price Examples
 
 | Ratio | Significa | Price Input |

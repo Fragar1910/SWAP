@@ -19,3 +19,34 @@ test-ledger
 
 # Build artifacts
 Cargo.lock
+
+# ===========================
+# KEYPAIRS - NUNCA SUBIR
+# ===========================
+*-keypair.json
+keypair.json
+wallet.json
+*.key.json
+
+# Keypairs específicos de Anchor/Solana
+target/deploy/*-keypair.json
+
+# Por si acaso, cualquier JSON con "secret" o "private"
+*secret*.json
+*private*.json
+
+# ===========================
+# SOLANA / ANCHOR
+# ===========================
+.anchor/
+target/
+node_modules/
+.env
+.env.local
+*.env
+
+# IDL generados (opcional, algunos equipos sí los commitean)
+# target/idl/
+
+# Test ledger local
+test-ledger/

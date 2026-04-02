@@ -132,7 +132,7 @@ MIT
 
 ## Contributors
 
-- Development Team
+- Development Team: Francisco Hipolito Garcia Martinez
 
 ## Acknowledgments
 
