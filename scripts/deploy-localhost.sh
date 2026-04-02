@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+# Asegurar que cargo de rustup se use antes que el de Homebrew
+export PATH="$HOME/.cargo/bin:/usr/bin:$PATH"
+
 echo "======================================================================"
 echo "🚀 SWAP DEX - Localhost Deployment Script"
 echo "======================================================================"
